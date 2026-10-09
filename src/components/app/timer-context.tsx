@@ -43,6 +43,12 @@ interface Ctx {
 
 const TimerCtx = createContext<Ctx | null>(null);
 
+const DROPPED = 'Under 5 seconds — nothing logged.';
+
+function asTimerError(e: unknown): ApiError {
+  return e instanceof ApiError ? e : new ApiError(0, 'NETWORK', TIMER_NETWORK_MESSAGE);
+}
+
 function startBody(input: StartInput) {
   return 'task_id' in input ? { task_id: input.task_id } : { task_name: input.task_name, project_id: input.project_id };
 }
@@ -116,7 +122,7 @@ export function TimerProvider({ children }: { children: ReactNode }) {
 
   const fail = useCallback(
     (e: unknown, opts: { silent?: boolean } = {}) => {
-      const err = e instanceof ApiError ? e : new ApiError(0, 'NETWORK', TIMER_NETWORK_MESSAGE);
+      const err = asTimerError(e);
       if (!opts.silent && err.status !== 401) toast.error(err.message);
       if (err.code === 'FL_TASK_NOT_FOUND') emit('tasks-changed');
       void refresh();
@@ -155,7 +161,7 @@ export function TimerProvider({ children }: { children: ReactNode }) {
         } else if (v.closed_session) {
           const cs = v.closed_session;
           markLogged(cs);
-          if (cs.dropped) toast('Under 5 seconds — nothing logged.');
+          if (cs.dropped) toast(DROPPED);
           else toast.success(`Switched to ${name}. Logged ${formatDuration(cs.run_seconds)} to ${prev?.task?.name ?? 'the last task'}.`);
           setAnnouncement(`Switched to ${name}`);
           setEnterSeq((n) => n + 1);
@@ -205,7 +211,7 @@ export function TimerProvider({ children }: { children: ReactNode }) {
     try {
       const v = await post('/api/timer/pause');
       const cs = v.closed_session;
-      if (cs?.dropped) toast('Under 5 seconds — nothing logged.');
+      if (cs?.dropped) toast(DROPPED);
       markLogged(cs);
       setAnnouncement(`Paused at ${formatClock(v.run?.closed_seconds ?? 0)}`);
     } catch (e) {
@@ -260,7 +266,7 @@ export function TimerProvider({ children }: { children: ReactNode }) {
           toast('Timer stopped. Nothing was logged.');
           setAnnouncement('Stopped. Nothing was logged.');
         } else if (cs.dropped) {
-          toast('Under 5 seconds — nothing logged.');
+          toast(DROPPED);
           setAnnouncement('Stopped. Nothing was logged.');
         } else {
           markLogged(cs);
@@ -273,7 +279,7 @@ export function TimerProvider({ children }: { children: ReactNode }) {
         if (prev?.session) void closeNudgeNotifications(prev.session.id);
         return { ok: true };
       } catch (e) {
-        const err = e instanceof ApiError ? e : new ApiError(0, 'NETWORK', TIMER_NETWORK_MESSAGE);
+        const err = asTimerError(e);
         if (opts.fromDialog && err.code.startsWith('FL_STOP_')) {
           void refresh();
           return { ok: false, error: err };

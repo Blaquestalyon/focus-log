@@ -15,11 +15,14 @@ export const TIMER_NETWORK_MESSAGE = "Couldn't reach Focus Log. Your timer hasn'
 export const SERVER_MESSAGE = 'Something went wrong on our side. Try again in a moment.';
 
 let redirecting = false;
-function goSignIn() {
-  if (redirecting || typeof window === 'undefined') return;
-  redirecting = true;
-  const next = window.location.pathname + window.location.search;
-  window.location.assign(`/sign-in?next=${encodeURIComponent(next)}&expired=1`);
+/** A 401: send the browser to sign in (once) and fail the call. */
+function signInRequired(): never {
+  if (!redirecting && typeof window !== 'undefined') {
+    redirecting = true;
+    const next = window.location.pathname + window.location.search;
+    window.location.assign(`/sign-in?next=${encodeURIComponent(next)}&expired=1`);
+  }
+  throw new ApiError(401, 'UNAUTHENTICATED', 'Sign in to continue.');
 }
 
 export interface ApiOptions {
@@ -49,10 +52,7 @@ export async function apiTimed<T>(path: string, opts: ApiOptions = {}): Promise<
     throw new ApiError(0, 'NETWORK', opts.networkMessage ?? NETWORK_MESSAGE);
   }
   const receivedAt = Date.now();
-  if (res.status === 401 && !opts.noAuthRedirect) {
-    goSignIn();
-    throw new ApiError(401, 'UNAUTHENTICATED', 'Sign in to continue.');
-  }
+  if (res.status === 401 && !opts.noAuthRedirect) signInRequired();
   if (res.status === 204) return { data: undefined as T, sentAt, receivedAt };
   let data: unknown = undefined;
   try {
@@ -86,10 +86,7 @@ export async function download(path: string): Promise<void> {
   } catch {
     throw new ApiError(0, 'NETWORK', NETWORK_MESSAGE);
   }
-  if (res.status === 401) {
-    goSignIn();
-    throw new ApiError(401, 'UNAUTHENTICATED', 'Sign in to continue.');
-  }
+  if (res.status === 401) signInRequired();
   if (!res.ok) {
     let msg = SERVER_MESSAGE;
     let code = 'SERVER_ERROR';
