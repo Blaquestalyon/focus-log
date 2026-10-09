@@ -3,7 +3,7 @@
  * Brand motifs (§2): the four-point sparkle (from the owner's logo), the app mark, the gold
  * wordmark, project dots, and the fixed, seeded starfields on sign-in and the Timer stage.
  */
-import { useId, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type RefObject } from 'react';
+import { useEffect, useId, useMemo, useRef, useState, type CSSProperties, type RefObject } from 'react';
 import type { ProjectColor } from '@/lib/types';
 import { cn } from './cn';
 
@@ -125,7 +125,9 @@ export function Starfield({
   const avoidRef = useRef(avoid);
   avoidRef.current = avoid;
 
-  useLayoutEffect(() => {
+  // A passive effect, not a layout effect: a child's layout effect runs before the parent's ref
+  // (the container) is attached, which left the field empty.
+  useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
     const compute = () => {

@@ -48,7 +48,8 @@ export function CountUp({ seconds, className }: { seconds: number; className?: s
 function Row({ s, tz, dayStartMs, now, sparkleSeq }: { s: SessionRow; tz: string; dayStartMs: number; now: number; sparkleSeq: number | null }) {
   const running = !s.ended_at;
   const fromYesterday = Date.parse(s.started_at) < dayStartMs;
-  const daySecs = running ? elapsedSeconds(Math.max(Date.parse(s.started_at), dayStartMs), now) : s.day_seconds ?? 0;
+  // A running session is never zero: it reads `<1m` through its first minute, even between the minute redraws.
+  const daySecs = running ? Math.max(1, elapsedSeconds(Math.max(Date.parse(s.started_at), dayStartMs), now)) : s.day_seconds ?? 0;
   const totalSecs = running ? elapsedSeconds(Date.parse(s.started_at), now) : s.duration_seconds ?? 0;
   const ui = useUi();
   const dur = <span className="tnum text-sm text-text-primary">{formatDuration(daySecs)}</span>;
@@ -152,7 +153,7 @@ export function TodayPanel() {
   const nowMs = running ? Math.max(now, timer.serverNow()) : timer.serverNow();
   const total = data.sessions.reduce((sum, s) => {
     if (s.ended_at) return sum + (s.day_seconds ?? 0);
-    return sum + elapsedSeconds(Math.max(Date.parse(s.started_at), dayStartMs), nowMs);
+    return sum + Math.max(1, elapsedSeconds(Math.max(Date.parse(s.started_at), dayStartMs), nowMs));
   }, 0);
 
   return (

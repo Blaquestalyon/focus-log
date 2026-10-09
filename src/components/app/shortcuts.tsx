@@ -55,7 +55,14 @@ export function Shortcuts() {
           e.preventDefault();
           if (pathname !== '/') {
             router.push('/');
-            setTimeout(() => ref.current.ui.focusTaskInput(), 300);
+            // The task box exists only once Timer has loaded its view; keep trying until it takes focus.
+            const until = Date.now() + 5000;
+            const tryFocus = () => {
+              ref.current.ui.focusTaskInput();
+              if (document.activeElement instanceof HTMLInputElement || Date.now() > until) return;
+              setTimeout(tryFocus, 100);
+            };
+            setTimeout(tryFocus, 100);
           } else ui.focusTaskInput();
           return;
         case 'p':

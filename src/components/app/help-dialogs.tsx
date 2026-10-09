@@ -30,9 +30,9 @@ export function HelpDialog() {
               <li key={p}>{p}</li>
             ))}
           </ol>
-          <p className="mt-4 text-meta text-text-muted">
+          <p className="mt-4 text-meta text-text-secondary">
             Something not working? Check{' '}
-            <Link href="/settings#status" onClick={() => ui.setHelp(false)} className="text-accent-text underline-offset-2 hover:underline">
+            <Link href="/settings#status" onClick={() => ui.setHelp(false)} className="text-accent-text underline underline-offset-2">
               System status in Settings
             </Link>
             .
@@ -79,7 +79,7 @@ export function ShortcutsDialog() {
                 <dd className="flex items-center gap-1">
                   {keys[0].map((k, i) => (
                     <span key={k} className="flex items-center gap-1">
-                      {i > 0 && keys[0].length === 2 && keys[0][0] === 'G' ? <span className="text-micro text-text-muted">then</span> : null}
+                      {i > 0 && keys[0].length === 2 && keys[0][0] === 'G' ? <span className="text-micro text-text-secondary">then</span> : null}
                       <Kbd>{k}</Kbd>
                     </span>
                   ))}
