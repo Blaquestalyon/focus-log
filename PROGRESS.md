@@ -1,16 +1,15 @@
 # Progress
 
 ## Done
-- Private repository created; the owner's approved plan saved as blueprint.md.
-- Data model applied to the owner's Supabase project (blueprint §3): seven tables with row-level security verified by the platform, the timer functions, triggers, example-data claims and the service-role data-removal function.
-- Live database rebuilt once to exactly the committed migration after a draft from an earlier session was found underneath it (see decisions.md); verified afterwards.
-- Owner account `jdavis@power-in-numbers.net` (email confirmed, no password, email identity present) with its settings and idle timer rows; example data seeded (4 Sample projects, 5 tasks, 5 sessions, 3 email records).
-- Local database test (`tests/db/run.mjs`) passes: migration and seed applied twice, every timer transition, Undo, claims, removal and access rules.
-- Owner checkpoint: the owner approved the data structure, and approved it again after the rebuild (2026-10-09).
+- Data model applied and approved (see decisions.md).
+- Build: project setup (Next.js 15, Tailwind 4 tokens, TypeScript), design tokens and base styles.
+- Build: shared formats and time-zone math, report and weekly-summary logic.
+- Build: server side — env checks, database clients, request helpers, rate limits, timer/session/report/project/task/settings/data/status/push/auth API routes, Postmark email (templates, exactly-once sending, retries, cap), pop-up alerts, the in-process scheduler, middleware and boot hook.
 
 ## In progress
-- Nothing; the data-model phase is complete.
+- Build: user interface (shell, components, screens).
 
 ## Next
-- Build phase: design foundation (tokens, shell, shared components), screens, API, scheduler, emails, pop-up alerts, icons, `npm run seed` / `npm run migrate`.
-- Wiring: Supabase Auth settings (sign-ups off, min password 10, OTP 3600s, Site URL = APP_URL).
+- Service worker, manifest and icons; seed script; unit tests; README.
+- Apply the second migration (session_rows view + email claim function).
+- Self-check: install, build, boot, health.

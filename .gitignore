@@ -15,3 +15,5 @@
 *.log
 /.pgdata/
 /tmp/
+*.tsbuildinfo
+/supabase/.temp/
