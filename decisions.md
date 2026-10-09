@@ -25,3 +25,32 @@ Each entry records what was decided and WHY, so a future reader can check whethe
   *Why:* an earlier build session had created the tables from a draft schema that was never committed. The committed migration only creates tables that are missing, so it landed on top of the draft tables and left a hybrid (draft constraints, a second new-user trigger, a stray function). A read-only check confirmed the database held only example rows and the owner's unused account, so the tables were dropped and recreated from the committed migration, keeping the owner's login, then re-seeded. A follow-up check confirmed one new-user trigger, no draft leftovers, the owner's login with its email identity, and the expected example rows. *Lesson:* a "create if missing" migration can't repair a database built by something else. Check what a database already holds before trusting it.
 - **The seed also repairs the owner's login record** (empty instead of NULL token fields, an email identity row) whenever it runs.
   *Why:* the owner account was first created by the earlier session in an unknown way, and Supabase's sign-in service fails on NULL token fields and needs an email identity for the set-password link.
+
+## 2026-10-09 — Build
+
+- **Next.js 15 `instrumentation.ts` starts the scheduler; its state lives on `globalThis`.**
+  *Why:* §8 puts the loop inside the web process. Route handlers and the boot hook can be bundled separately, so the heartbeat that `/api/health` and System status read must be shared through `globalThis`, not a module variable.
+- **Middleware runs on the Node.js runtime** (`runtime: 'nodejs'`, stable in Next 15.5).
+  *Why:* it reads `SUPABASE_URL`/`SUPABASE_ANON_KEY` at request time; the Node runtime reads environment variables at runtime rather than at build time.
+- **A read-only view `session_rows` (security_invoker) and a service-role function `fl_email_log_claim`** were added in a second migration.
+  *Why:* History's search must match the task name OR the project name in one query, and the exactly-once email insert needs `ON CONFLICT … WHERE is_example = false`, which the REST layer cannot express. The view runs with the caller's RLS.
+- **`GET /api/sessions/:id` was added** (not listed in §7).
+  *Why:* History's `?session=<id>` deep link (T-H8) must open the Edit dialog for a session that may not be on the first page. It is read-only, signed-in only and RLS-scoped.
+- **`POST /api/timer/start` may include `unarchived: true`** in its timer view.
+  *Why:* F3 requires the toast "Unarchived Invoice prep." when starting by name revives an archived task; the client needs to know that happened.
+- **Password-link retries generate a fresh link.**
+  *Why:* §8 retries failed sends after 5 and 30 minutes; the original one-time token cannot be recovered from the log (links are never stored), so a retry asks Supabase for a new one.
+- **Rate limits use a sliding window** rather than a token bucket.
+  *Why:* §6 states limits as "N per window"; a sliding window gives exactly "the 11th attempt in 15 minutes answers 429" (T-A2, T-S8) and "5 test alerts per hour" (T-P9).
+- **`npm run migrate` uses `supabase db push --db-url … --include-all`.**
+  *Why:* the live database was first built through the platform's migration tool, so Supabase's migration history is empty; `--include-all` lets the first deploy apply (harmlessly re-apply) both re-runnable migrations and record them.
+- **Copy the blueprint does not pin, filled in plainly** (to confirm with the owner at review): the duplicate-task message ("You already have a task called "X" in <project>."), toasts after deleting a project or task ("Deleted X."), "Project updated." / "Task updated." / "Created X." for task creation, the Tasks tab's filtered-empty state ("No tasks match." / "Try a different word or project."), the project delete body when it has no tasks, and a short description line under "Delete all tracked data".
+  *Why:* every async outcome needs a visible result (design standards); these follow the voice of the nearest specced copy.
+- **Build-time dependencies are in `dependencies`.**
+  *Why:* Railway installs with `NODE_ENV=production`, which skips devDependencies; TypeScript, Tailwind and `tsx` (for `npm run seed`) must be present for `npm run build` and the scripts. Test-only tools stay in devDependencies.
+- **App icons are generated before every build (`prebuild` runs `scripts/icons.ts`) and are not committed.**
+  *Why:* the platform's push path carries text files only, so the PNGs cannot reach the repo; rendering them from the brand mark at build time gives the deploy the same three files. *Re-check if:* binary files can be pushed — then committing them removes a build step.
+- **The boot work lives in `src/instrumentation-node.ts`, imported from `instrumentation.ts` only inside the `NEXT_RUNTIME === 'nodejs'` check.**
+  *Why:* with an early `return` instead, `next dev` also bundled the scheduler (and web-push) for the edge runtime and failed with "Can't resolve 'http'". Production builds were unaffected, but `npm run dev` must work for whoever maintains the app.
+- **The build was clicked through against a local stand-in of Supabase** (embedded Postgres + the official PostgREST and Supabase Auth server binaries behind a small gateway), with the same migrations and seed.
+  *Why:* the platform never hands the owner's database keys to the build sandbox, so this is the only way to exercise signed-in screens before deploy. It is evidence about the code, not about the live project — the deployed app is still checked against the real database at deploy.
