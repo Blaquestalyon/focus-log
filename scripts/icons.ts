@@ -4,6 +4,7 @@
  * generated, not committed (the repo carries text files only).
  */
 import sharp from 'sharp';
+import fs from 'node:fs';
 import path from 'node:path';
 
 const SPARKLE = 'M12 0C12.9 7.2 16.8 11.1 24 12C16.8 12.9 12.9 16.8 12 24C11.1 16.8 7.2 12.9 0 12C7.2 11.1 11.1 7.2 12 0Z';
@@ -29,6 +30,8 @@ function svg(size: number, markSize: number): string {
 
 async function main() {
   const out = path.join(process.cwd(), 'public', 'icons');
+  // The folder holds only generated files, so a clean checkout does not have it.
+  fs.mkdirSync(out, { recursive: true });
   await sharp(Buffer.from(svg(192, 192 * 0.75))).png().toFile(path.join(out, 'icon-192.png'));
   await sharp(Buffer.from(svg(512, 512 * 0.75))).png().toFile(path.join(out, 'icon-512.png'));
   // Maskable: the mark stays inside the central 60% (20% safe padding on every side).

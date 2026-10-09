@@ -2,6 +2,7 @@
 import * as P from '@radix-ui/react-popover';
 import type { ReactNode } from 'react';
 import { cn } from './cn';
+import { useDropdownLayer } from './layer';
 
 export const PopoverRoot = P.Root;
 export const PopoverTrigger = P.Trigger;
@@ -18,6 +19,7 @@ export function PopoverContent({
   align?: 'start' | 'end' | 'center';
   onOpenAutoFocus?: (e: Event) => void;
 }) {
+  const layer = useDropdownLayer();
   return (
     <P.Portal>
       <P.Content
@@ -25,7 +27,7 @@ export function PopoverContent({
         sideOffset={4}
         collisionPadding={8}
         onOpenAutoFocus={onOpenAutoFocus}
-        className={cn('anim-menu z-[var(--z-dropdown)] rounded-md border border-border bg-surface-raised p-1 shadow-overlay', className)}
+        className={cn('anim-menu rounded-md border border-border bg-surface-raised p-1 shadow-overlay', layer, className)}
       >
         {children}
       </P.Content>

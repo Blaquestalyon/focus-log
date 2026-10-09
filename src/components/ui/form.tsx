@@ -6,6 +6,7 @@ import * as Rg from '@radix-ui/react-radio-group';
 import * as Sel from '@radix-ui/react-select';
 import { Check, ChevronDown, CircleAlert } from 'lucide-react';
 import { cn } from './cn';
+import { useDropdownLayer } from './layer';
 
 /** Label (14px secondary, 8px above), the control, then an error linked by aria-describedby. */
 export function Field({
@@ -89,12 +90,20 @@ export function Switch({
       aria-label={label}
       aria-describedby={describedBy}
       className={cn(
-        'relative inline-flex h-6 w-10 shrink-0 items-center rounded-pill bg-border-strong transition-fast',
-        'hover:brightness-125 data-[state=checked]:bg-accent data-[state=checked]:hover:bg-accent-hover',
+        // A 40px (44px on phones) hit area around the 24px track.
+        'group/sw relative inline-flex h-10 w-12 shrink-0 items-center justify-center rounded-sm max-md:h-11',
         'disabled:cursor-not-allowed disabled:opacity-40',
       )}
     >
-      <Sw.Thumb className="block size-4 translate-x-1 rounded-pill bg-text-primary transition-fast data-[state=checked]:translate-x-5 data-[state=checked]:bg-on-accent" />
+      <span
+        aria-hidden
+        className={cn(
+          'relative inline-flex h-6 w-10 items-center rounded-pill bg-border-strong transition-fast',
+          'group-hover/sw:brightness-125 group-data-[state=checked]/sw:bg-accent group-data-[state=checked]/sw:group-hover/sw:bg-accent-hover',
+        )}
+      >
+        <Sw.Thumb className="block size-4 translate-x-1 rounded-pill bg-text-primary transition-fast data-[state=checked]:translate-x-5 data-[state=checked]:bg-on-accent" />
+      </span>
     </Sw.Root>
   );
 }
@@ -153,14 +162,14 @@ export function Segmented<T extends string>({
       aria-label={label}
       orientation="horizontal"
       loop
-      className={cn('inline-flex h-10 items-stretch rounded-sm border border-border bg-surface p-0.5', className)}
+      className={cn('inline-flex items-stretch rounded-sm border border-border bg-surface p-0.5', className)}
     >
       {options.map((o, i) => (
         <Rg.Item
           key={o.value}
           value={o.value}
           className={cn(
-            'relative inline-flex items-center justify-center rounded-sm border border-transparent px-3 font-mono text-micro uppercase tracking-[0.08em] text-text-muted transition-fast',
+            'relative inline-flex h-10 items-center justify-center rounded-sm border border-transparent px-3 font-mono max-md:h-11 text-micro uppercase tracking-[0.08em] text-text-muted transition-fast',
             'hover:text-text-secondary',
             'data-[state=checked]:border-accent-subtle-border data-[state=checked]:bg-accent-subtle data-[state=checked]:text-accent-text',
             i > 0 && 'ml-0.5',
@@ -196,6 +205,7 @@ export function Select({
   disabled?: boolean;
   className?: string;
 }) {
+  const layer = useDropdownLayer();
   return (
     <Sel.Root value={value} onValueChange={onValueChange} disabled={disabled}>
       <Sel.Trigger
@@ -214,7 +224,7 @@ export function Select({
           position="popper"
           sideOffset={4}
           collisionPadding={8}
-          className="anim-menu z-[var(--z-dropdown)] max-h-80 min-w-[var(--radix-select-trigger-width)] overflow-hidden rounded-md border border-border bg-surface-raised shadow-overlay"
+          className={cn('anim-menu max-h-80 min-w-[var(--radix-select-trigger-width)] overflow-hidden rounded-md border border-border bg-surface-raised shadow-overlay', layer)}
         >
           <Sel.Viewport className="p-1">
             {options.map((o) => (

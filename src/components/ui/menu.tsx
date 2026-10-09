@@ -52,6 +52,25 @@ export function MenuContent({ children, align = 'end', className }: { children: 
   );
 }
 
+/**
+ * The ⋯ trigger of the menu whose item was just chosen. A dialog opened from a menu item mounts as
+ * the menu (and the focused item) is removed, so it cannot see where focus came from; it takes this
+ * instead and returns focus there when it closes (§4: focus returns to the trigger).
+ */
+let menuReturn: { el: HTMLElement; at: number } | null = null;
+
+export function takeMenuReturnTarget(): HTMLElement | null {
+  const r = menuReturn;
+  menuReturn = null;
+  return r && Date.now() - r.at < 2000 && r.el.isConnected ? r.el : null;
+}
+
+function rememberMenuTrigger(item: EventTarget | null) {
+  const menu = item instanceof HTMLElement ? item.closest('[role="menu"]') : null;
+  const trigger = menu?.id ? document.querySelector<HTMLElement>(`[aria-controls="${CSS.escape(menu.id)}"]`) : null;
+  menuReturn = trigger ? { el: trigger, at: Date.now() } : null;
+}
+
 export const MenuItem = forwardRef<
   HTMLDivElement,
   { children: ReactNode; icon?: ReactNode; danger?: boolean; disabled?: boolean; tip?: string; onSelect?: () => void }
@@ -60,7 +79,10 @@ export const MenuItem = forwardRef<
     <M.Item
       ref={ref}
       disabled={disabled}
-      onSelect={() => onSelect?.()}
+      onSelect={(e) => {
+        rememberMenuTrigger(e.currentTarget ?? e.target);
+        onSelect?.();
+      }}
       className={cn(
         'flex h-9 cursor-pointer select-none items-center gap-2 rounded-sm px-2 text-sm outline-none transition-fast',
         danger ? 'text-danger-text' : 'text-text-primary',

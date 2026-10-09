@@ -1,9 +1,11 @@
 'use client';
 import * as D from '@radix-ui/react-dialog';
-import { useState, type ReactNode } from 'react';
+import { useRef, useState, type ReactNode } from 'react';
 import { X } from 'lucide-react';
 import { cn } from './cn';
 import { Button, IconButton } from './button';
+import { takeMenuReturnTarget } from './menu';
+import { InDialogContext } from './layer';
 
 export const DialogRoot = D.Root;
 export const DialogClose = D.Close;
@@ -31,11 +33,36 @@ export function DialogContent({
   onOpenAutoFocus?: (e: Event) => void;
   hideClose?: boolean;
 }) {
+  const returnTo = useRef<HTMLElement | null>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
+  const closeRef = useRef<HTMLButtonElement>(null);
   return (
     <D.Portal>
       <D.Overlay className="anim-backdrop fixed inset-0 z-[var(--z-dialog)] bg-backdrop" />
       <D.Content
-        onOpenAutoFocus={onOpenAutoFocus}
+        ref={contentRef}
+        onOpenAutoFocus={(e) => {
+          returnTo.current = takeMenuReturnTarget();
+          onOpenAutoFocus?.(e);
+          if (e.defaultPrevented) return;
+          // A dialog with nothing to fill in (help, shortcuts) would otherwise focus Close, whose
+          // tooltip takes the first Esc; focus the dialog itself instead.
+          const first = contentRef.current?.querySelector<HTMLElement>(
+            'a[href], button:not([disabled]), input:not([disabled]):not([type="hidden"]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
+          );
+          if (!first || first === closeRef.current) {
+            e.preventDefault();
+            contentRef.current?.focus();
+          }
+        }}
+        onCloseAutoFocus={(e) => {
+          const t = returnTo.current;
+          returnTo.current = null;
+          if (t?.isConnected) {
+            e.preventDefault();
+            t.focus();
+          }
+        }}
         aria-describedby={description ? undefined : undefined}
         className={cn(
           'anim-dialog dialog-center z-[var(--z-dialog)] flex max-h-[calc(100dvh-2rem)] w-[calc(100vw-2rem)] flex-col rounded-md border border-border bg-surface-overlay shadow-overlay',
@@ -43,7 +70,8 @@ export function DialogContent({
         )}
         style={{ maxWidth: wide ? 'var(--size-dialog-wide)' : 'var(--size-dialog)' }}
       >
-        <div className="flex items-start gap-4 px-6 pt-6">
+        <InDialogContext.Provider value>
+        <div className={cn('flex items-start gap-4 px-6 pt-6', !hideClose && 'pr-18')}>
           <div className="min-w-0 flex-1">
             <D.Title className="section-heading text-text-primary">{title}</D.Title>
             {description ? (
@@ -52,16 +80,19 @@ export function DialogContent({
               <D.Description className="sr-only">{typeof title === 'string' ? title : 'Dialog'}</D.Description>
             )}
           </div>
-          {!hideClose && (
-            <D.Close asChild>
-              <IconButton label="Close" className="-mr-2 -mt-2">
-                <X className="size-4" aria-hidden />
-              </IconButton>
-            </D.Close>
-          )}
         </div>
         {children ? <div className="min-h-0 flex-1 overflow-y-auto px-6 pt-4">{children}</div> : null}
         {footer ? <div className="flex flex-wrap items-center justify-end gap-2 px-6 pb-6 pt-6">{footer}</div> : <div className="pb-6" />}
+        {/* Last in the tab order, so opening focus lands on the first field (or Cancel), not on this
+            button: its tooltip opens on focus and would swallow the first Esc. */}
+        {!hideClose && (
+          <D.Close asChild>
+            <IconButton ref={closeRef} label="Close" className="absolute right-4 top-4">
+              <X className="size-4" aria-hidden />
+            </IconButton>
+          </D.Close>
+        )}
+        </InDialogContext.Provider>
       </D.Content>
     </D.Portal>
   );

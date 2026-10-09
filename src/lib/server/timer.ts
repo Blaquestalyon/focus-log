@@ -42,8 +42,9 @@ export async function timerRpc(
   if (error.code === '23514' && /sessions_max_24h/.test(error.message || '')) {
     throw new HttpError(409, 'FL_STOP_TOO_LONG', TIMER_ERRORS.FL_STOP_TOO_LONG.message);
   }
-  if (error.code === '23P01' || error.code === '23505') {
-    // A concurrent start from another device won the race; the caller refetches.
+  if (error.code === '23P01' || error.code === '23505' || (error.code === '23514' && /sessions_end_after_start/.test(error.message || ''))) {
+    // A concurrent action from another device won the race (a waiting call closing the winner's
+    // brand-new session at its own earlier transaction time trips sessions_end_after_start); the caller refetches.
     throw new HttpError(409, 'FL_NOT_RUNNING', TIMER_ERRORS.FL_NOT_RUNNING.message);
   }
   dbFail(error, fn);

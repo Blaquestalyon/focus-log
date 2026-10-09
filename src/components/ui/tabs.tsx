@@ -4,7 +4,20 @@ import type { ReactNode } from 'react';
 import { cn } from './cn';
 
 export const TabsRoot = T.Root;
-export const TabsContent = T.Content;
+/**
+ * Tab panel. Radix makes it focusable (one Tab stop into the panel), so it shows the same gold
+ * focus ring as everything else, even where a screen passes `outline-none`.
+ */
+export function TabsContent({ value, className, children }: { value: string; className?: string; children: ReactNode }) {
+  return (
+    <T.Content
+      value={value}
+      className={cn(className, 'focus-visible:outline-solid focus-visible:outline-[length:var(--size-focus)] focus-visible:outline-accent focus-visible:outline-offset-2')}
+    >
+      {children}
+    </T.Content>
+  );
+}
 
 export function TabsList({ children, label }: { children: ReactNode; label: string }) {
   return (
