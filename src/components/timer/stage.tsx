@@ -283,7 +283,8 @@ export function Stage() {
             </div>
           ) : null}
         </div>
-        <div className="hairline-gold" aria-hidden />
+        {/* Left-aligned with the clock's first digit: on md+ the left flank (w-40) and the row gap (gap-8) sit before it. */}
+        <div className={cn('hairline-gold', status !== 'idle' && 'md:ml-48')} aria-hidden />
 
         {/* Controls */}
         {status !== 'idle' ? (
