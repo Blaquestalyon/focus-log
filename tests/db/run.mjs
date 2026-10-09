@@ -10,8 +10,9 @@ const c = new pg.Client({ host: 'localhost', port: 54329, user: 'postgres', pass
 await c.connect();
 await c.query("set timezone='UTC'");
 const ws = process.argv[2] ?? process.cwd();
-for (const f of [new URL('./supabase-stub.sql', import.meta.url).pathname, `${ws}/supabase/migrations/20261009000000_focus_log_schema.sql`,
-                 `${ws}/supabase/migrations/20261009000000_focus_log_schema.sql`, `${ws}/supabase/seed.sql`, `${ws}/supabase/seed.sql`]) {
+const migrations = fs.readdirSync(`${ws}/supabase/migrations`).filter((f) => f.endsWith('.sql')).sort().map((f) => `${ws}/supabase/migrations/${f}`);
+// Every migration is applied twice (they must be re-runnable), then the seed twice.
+for (const f of [new URL('./supabase-stub.sql', import.meta.url).pathname, ...migrations, ...migrations, `${ws}/supabase/seed.sql`, `${ws}/supabase/seed.sql`]) {
   await c.query(fs.readFileSync(f, 'utf8')); console.log('applied', f.split('/').pop());
 }
 const tests = (await import(process.argv[3] ?? new URL("./timer-functions.test.mjs", import.meta.url).href)).default;
