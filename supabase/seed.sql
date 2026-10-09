@@ -34,7 +34,18 @@ begin
       now(), '{"provider":"email","providers":["email"]}'::jsonb, '{}'::jsonb,
       now(), now(),
       '', '', '', '');
+  end if;
 
+  -- The sign-in service needs an email identity, and it rejects NULL token
+  -- columns, so make sure both hold for the owner however the account was made.
+  update auth.users
+     set confirmation_token     = coalesce(confirmation_token, ''),
+         recovery_token         = coalesce(recovery_token, ''),
+         email_change_token_new = coalesce(email_change_token_new, ''),
+         email_change           = coalesce(email_change, ''),
+         email_confirmed_at     = coalesce(email_confirmed_at, now())
+   where id = v_uid;
+  if not exists (select 1 from auth.identities where user_id = v_uid and provider = 'email') then
     insert into auth.identities (id, user_id, provider_id, provider, identity_data, created_at, updated_at)
     values (
       gen_random_uuid(), v_uid, v_uid::text, 'email',
