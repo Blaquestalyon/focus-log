@@ -10,6 +10,7 @@ import { toast } from '@/lib/client/toast';
 import { apiTimed, ApiError, TIMER_NETWORK_MESSAGE } from '@/lib/client/api';
 import { emit } from '@/lib/client/events';
 import { formatClock, formatDuration } from '@/lib/format';
+import { elapsedSeconds } from '@/lib/time';
 import type { ClosedSession, TimerView } from '@/lib/types';
 import { useUi, type StartInput } from './ui-context';
 import { closeNudgeNotifications } from '@/lib/client/push';
@@ -72,13 +73,13 @@ export function TimerProvider({ children }: { children: ReactNode }) {
     if (!v || v.status === 'idle' || !v.run) return 0;
     if (v.status === 'paused') return v.run.closed_seconds;
     const started = v.session ? Date.parse(v.session.started_at) : now;
-    return v.run.closed_seconds + Math.max(0, Math.floor((now - started) / 1000));
+    return v.run.closed_seconds + elapsedSeconds(started, now);
   }, []);
 
   const sessionSeconds = useCallback((now: number) => {
     const v = viewRef.current;
     if (!v || v.status !== 'running' || !v.session) return 0;
-    return Math.max(0, Math.floor((now - Date.parse(v.session.started_at)) / 1000));
+    return elapsedSeconds(Date.parse(v.session.started_at), now);
   }, []);
 
   const over24 = useCallback(() => sessionSeconds(serverNow()) >= DAY_SECONDS, [sessionSeconds, serverNow]);

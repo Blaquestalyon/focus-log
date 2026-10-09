@@ -6,7 +6,6 @@ import { cn } from './cn';
 import { Button, IconButton } from './button';
 
 export const DialogRoot = D.Root;
-export const DialogTrigger = D.Trigger;
 export const DialogClose = D.Close;
 
 /**
@@ -66,11 +65,6 @@ export function DialogContent({
       </D.Content>
     </D.Portal>
   );
-}
-
-/** Cancel (ghost) to the left of the confirm button, right-aligned. */
-export function DialogFooter({ children }: { children: ReactNode }) {
-  return <>{children}</>;
 }
 
 /**

@@ -6,7 +6,6 @@ import { cn } from './cn';
 export const PopoverRoot = P.Root;
 export const PopoverTrigger = P.Trigger;
 export const PopoverAnchor = P.Anchor;
-export const PopoverClose = P.Close;
 
 export function PopoverContent({
   children,

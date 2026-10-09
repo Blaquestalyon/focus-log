@@ -14,7 +14,7 @@ import { SessionMenu } from '@/components/app/session-actions';
 import { api, ApiError } from '@/lib/client/api';
 import { useAlignedNow, useEvent, useReducedMotion } from '@/lib/client/hooks';
 import { formatDateStr, formatDuration, formatTimeRange } from '@/lib/format';
-import { startOfLocalDay } from '@/lib/time';
+import { elapsedSeconds, startOfLocalDay } from '@/lib/time';
 import type { SessionRow, TodayResponse } from '@/lib/types';
 
 /** Counts up from its old value to the new one over 400ms (instant under reduced motion). */
@@ -48,8 +48,8 @@ export function CountUp({ seconds, className }: { seconds: number; className?: s
 function Row({ s, tz, dayStartMs, now, sparkleSeq }: { s: SessionRow; tz: string; dayStartMs: number; now: number; sparkleSeq: number | null }) {
   const running = !s.ended_at;
   const fromYesterday = Date.parse(s.started_at) < dayStartMs;
-  const daySecs = running ? Math.max(0, Math.floor((now - Math.max(Date.parse(s.started_at), dayStartMs)) / 1000)) : s.day_seconds ?? 0;
-  const totalSecs = running ? Math.max(0, Math.floor((now - Date.parse(s.started_at)) / 1000)) : s.duration_seconds ?? 0;
+  const daySecs = running ? elapsedSeconds(Math.max(Date.parse(s.started_at), dayStartMs), now) : s.day_seconds ?? 0;
+  const totalSecs = running ? elapsedSeconds(Date.parse(s.started_at), now) : s.duration_seconds ?? 0;
   const ui = useUi();
   const dur = <span className="tnum text-sm text-text-primary">{formatDuration(daySecs)}</span>;
   return (
@@ -152,7 +152,7 @@ export function TodayPanel() {
   const nowMs = running ? Math.max(now, timer.serverNow()) : timer.serverNow();
   const total = data.sessions.reduce((sum, s) => {
     if (s.ended_at) return sum + (s.day_seconds ?? 0);
-    return sum + Math.max(0, Math.floor((nowMs - Math.max(Date.parse(s.started_at), dayStartMs)) / 1000));
+    return sum + elapsedSeconds(Math.max(Date.parse(s.started_at), dayStartMs), nowMs);
   }, 0);
 
   return (

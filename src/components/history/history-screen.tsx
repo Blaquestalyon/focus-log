@@ -21,7 +21,7 @@ import { api, ApiError, download, messageOf } from '@/lib/client/api';
 import { useAlignedNow, useEvent } from '@/lib/client/hooks';
 import { toast } from '@/lib/client/toast';
 import { formatDate, formatDayLong, formatDuration, formatTimeRange } from '@/lib/format';
-import { localDateStr, todayStr } from '@/lib/time';
+import { elapsedSeconds, localDateStr, todayStr } from '@/lib/time';
 import type { SessionRow, SessionsResponse } from '@/lib/types';
 
 type RangeKey = '7d' | '30d' | '90d' | 'all' | 'custom';
@@ -352,7 +352,7 @@ export function HistoryScreen() {
 
 function SortHeader({ label, active, onClick, className }: { label: string; active: boolean; onClick: () => void; className?: string }) {
   return (
-    <span role="columnheader" aria-sort={active ? (label === 'Date' ? 'descending' : 'descending') : 'none'} className={cn('flex', className)}>
+    <span role="columnheader" aria-sort={active ? 'descending' : 'none'} className={cn('flex', className)}>
       <button
         type="button"
         onClick={onClick}
@@ -369,7 +369,7 @@ function HistoryRow({ r, tz, now, fresh }: { r: SessionRow; tz: string; now: num
   const ui = useUi();
   const running = !r.ended_at;
   const overnight = r.ended_at ? localDateStr(r.started_at, tz) !== localDateStr(r.ended_at, tz) : false;
-  const secs = running ? Math.max(0, Math.floor((now - Date.parse(r.started_at)) / 1000)) : r.duration_seconds ?? 0;
+  const secs = running ? elapsedSeconds(Date.parse(r.started_at), now) : r.duration_seconds ?? 0;
   const open = () => !running && ui.openEditSession(r);
   const tags = (
     <>

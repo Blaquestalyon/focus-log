@@ -11,7 +11,7 @@ import { useSettings } from './settings-context';
 import { api, ApiError, messageOf } from '@/lib/client/api';
 import { emit } from '@/lib/client/events';
 import { formatDuration, formatStartedFlank, formatTime } from '@/lib/format';
-import { browserTimeZone, localDateStr, localDateTimeToInstant, localTimeStr } from '@/lib/time';
+import { browserTimeZone, elapsedSeconds, localDateStr, localDateTimeToInstant, localTimeStr } from '@/lib/time';
 import { closeNudgeNotifications } from '@/lib/client/push';
 
 export function ZoneNote({ tz }: { tz: string }) {
@@ -64,7 +64,7 @@ export function StopAtDialog() {
 
   const task = v?.task?.name ?? '';
   const closed = v?.run?.closed_seconds ?? 0;
-  const sessSecs = chosen && sessionStart ? Math.max(0, Math.floor((chosen - sessionStart) / 1000)) : 0;
+  const sessSecs = chosen && sessionStart ? elapsedSeconds(sessionStart, chosen) : 0;
   const runStart = v?.run?.started_at ?? v?.session?.started_at ?? null;
   const live =
     chosen && sessionStart
@@ -86,7 +86,6 @@ export function StopAtDialog() {
     const r = pending ? await timer.stopThenStart(iso, pending) : await timer.stop(iso, { fromDialog: true });
     setBusy(false);
     if (r.ok) ui.closeStopAt();
-    else if (r.error && r.error.code.startsWith('FL_STOP_')) setError(r.error.message);
     else if (r.error) setError(r.error.message);
   };
 
@@ -165,7 +164,7 @@ export function EditStartDialog() {
 
   const chosen = date && time ? localDateTimeToInstant(date, time, tz).getTime() : null;
   const v = timer.view;
-  const clockIf = chosen ? (v?.run?.closed_seconds ?? 0) + Math.max(0, Math.floor((timer.serverNow() - chosen) / 1000)) : 0;
+  const clockIf = chosen ? (v?.run?.closed_seconds ?? 0) + elapsedSeconds(chosen, timer.serverNow()) : 0;
 
   const submit = async () => {
     if (!ui.editStart || !chosen) return;

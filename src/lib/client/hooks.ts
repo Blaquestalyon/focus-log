@@ -15,15 +15,7 @@ export function useEvent(names: AppEvent | AppEvent[], fn: (detail?: unknown) =>
 
 /** prefers-reduced-motion */
 export function useReducedMotion(): boolean {
-  const [r, setR] = useState(false);
-  useEffect(() => {
-    const m = window.matchMedia('(prefers-reduced-motion: reduce)');
-    const f = () => setR(m.matches);
-    f();
-    m.addEventListener('change', f);
-    return () => m.removeEventListener('change', f);
-  }, []);
-  return r;
+  return useMediaQuery('(prefers-reduced-motion: reduce)');
 }
 
 export function useMediaQuery(q: string): boolean {
