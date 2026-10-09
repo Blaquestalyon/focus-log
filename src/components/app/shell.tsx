@@ -69,14 +69,14 @@ function MiniTimer({ variant }: { variant: 'full' | 'rail' | 'pill' }) {
   }
   if (variant === 'pill') {
     return (
-      <Link href="/" aria-label={label} className="flex h-8 items-center gap-2 rounded-pill border border-border bg-surface px-3 transition-fast hover:bg-surface-raised">
+      <Link href="/" aria-label={label} className="flex h-11 items-center gap-2 rounded-pill border border-border bg-surface px-3 transition-fast hover:bg-surface-raised">
         <OnAirDot paused={paused} />
         <span className="tnum text-micro text-text-primary">{formatClock(secs)}</span>
       </Link>
     );
   }
   return (
-    <Link href="/" aria-label={label} className="mx-3 flex items-center gap-3 rounded-md border border-border bg-surface px-3 py-2 transition-fast hover:bg-surface-raised">
+    <Link href="/" aria-label={label} className="mx-3 flex min-h-10 items-center gap-3 rounded-md border border-border bg-surface px-3 py-2 transition-fast hover:bg-surface-raised max-md:min-h-11">
       <OnAirDot paused={paused} />
       <Tip label={view.task.name}>
         <span className="min-w-0 flex-1 truncate text-sm text-text-primary">{view.task.name}</span>

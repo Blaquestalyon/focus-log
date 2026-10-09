@@ -38,7 +38,7 @@ export function fuzzyScore(text: string, q: string): number {
 }
 
 const GROUP =
-  '[&_[cmdk-group-heading]]:px-3 [&_[cmdk-group-heading]]:pb-1 [&_[cmdk-group-heading]]:pt-3 [&_[cmdk-group-heading]]:font-mono [&_[cmdk-group-heading]]:text-micro [&_[cmdk-group-heading]]:uppercase [&_[cmdk-group-heading]]:tracking-[0.08em] [&_[cmdk-group-heading]]:text-text-muted';
+  '[&_[cmdk-group-heading]]:px-3 [&_[cmdk-group-heading]]:pb-1 [&_[cmdk-group-heading]]:pt-3 [&_[cmdk-group-heading]]:font-mono [&_[cmdk-group-heading]]:text-micro [&_[cmdk-group-heading]]:uppercase [&_[cmdk-group-heading]]:tracking-[0.08em] [&_[cmdk-group-heading]]:text-text-secondary';
 
 interface Item { id: string; label: string; hint?: ReactNode; icon?: ReactNode; keywords?: string; run: () => void }
 
@@ -81,7 +81,7 @@ export function CommandPalette() {
         label: t.name,
         keywords: t.project?.name ?? 'No project',
         icon: <ProjectDot color={t.project?.color ?? null} />,
-        hint: <span className="truncate text-meta text-text-muted">{t.project?.name ?? 'No project'}</span>,
+        hint: <span className="truncate text-meta text-text-secondary">{t.project?.name ?? 'No project'}</span>,
         run: run(() => void timer.start({ task_id: t.id, label: t.name })),
       }));
     const navItems: Item[] = NAV.map((n) => ({ id: `go-${n.href}`, label: n.label, keywords: 'go to', run: run(() => router.push(n.href)) }));
@@ -166,7 +166,7 @@ export function CommandPalette() {
               {nothing ? (
                 <div className="px-4 py-8 text-center">
                   <p className="mx-auto text-sm text-text-primary">Nothing matches &ldquo;{typed}&rdquo;.</p>
-                  <p className="mx-auto mt-1 text-meta text-text-muted">Press Enter to start it as a new task.</p>
+                  <p className="mx-auto mt-1 text-meta text-text-secondary">Press Enter to start it as a new task.</p>
                 </div>
               ) : null}
               {timerItems.length ? (
