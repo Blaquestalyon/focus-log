@@ -1,0 +1,12 @@
+# Minimal Supabase CLI project file. Used by `npm run migrate`
+# (supabase db push --db-url) and by a local stack for tests.
+project_id = "focus-log"
+
+[auth]
+site_url = "http://localhost:3000"
+enable_signup = false
+minimum_password_length = 10
+
+[auth.email]
+enable_signup = false
+otp_expiry = 3600
