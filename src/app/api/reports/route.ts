@@ -1,4 +1,4 @@
-import { authed, json, HttpError } from '@/lib/server/http';
+import { authed, json, HttpError, MSG } from '@/lib/server/http';
 import { getSettingsRow } from '@/lib/server/settings';
 import { fetchAll } from '@/lib/server/rows';
 import { computeReport, periodBounds, validatePeriodStart, type Period, type ReportRow } from '@/lib/report-core';
@@ -8,13 +8,13 @@ export const dynamic = 'force-dynamic';
 export const GET = authed(async ({ req, supabase, user }) => {
   const sp = req.nextUrl.searchParams;
   const period = sp.get('period');
-  if (period !== 'week' && period !== 'month') throw new HttpError(400, 'VALIDATION', "That request wasn't valid.", 'period');
+  if (period !== 'week' && period !== 'month') throw new HttpError(400, 'VALIDATION', MSG.badRequest, 'period');
   const st = await getSettingsRow(supabase, user.id);
   const tz = st.time_zone;
   const now = Date.now();
   const start = sp.get('start');
   if (validatePeriodStart(period as Period, start, tz, now)) {
-    throw new HttpError(400, 'VALIDATION', "That request wasn't valid.", 'start');
+    throw new HttpError(400, 'VALIDATION', MSG.badRequest, 'start');
   }
   const { range, prev } = periodBounds(period as Period, start!, tz);
   const rows = await fetchAll<ReportRow>(

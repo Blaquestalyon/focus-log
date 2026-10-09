@@ -1,4 +1,4 @@
-import { authed, json, dbFail, HttpError } from '@/lib/server/http';
+import { authed, json, dbFail, HttpError, MSG } from '@/lib/server/http';
 import { humanError } from '@/lib/server/email/postmark';
 import { decodeCursor, encodeCursor } from '@/lib/server/history';
 import type { EmailLogRow } from '@/lib/types';
@@ -16,7 +16,7 @@ export const GET = authed(async ({ req, supabase }) => {
     .limit(51);
   if (cursor) {
     const [v, id] = cursor;
-    if (typeof v !== 'string') throw new HttpError(400, 'VALIDATION', "That request wasn't valid.", 'cursor');
+    if (typeof v !== 'string') throw new HttpError(400, 'VALIDATION', MSG.badRequest, 'cursor');
     q = q.or(`created_at.lt."${v}",and(created_at.eq."${v}",id.lt.${id})`);
   }
   const { data, error } = await q;

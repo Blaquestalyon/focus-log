@@ -1,7 +1,7 @@
 import 'server-only';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { formatTime, formatTimeRange } from '@/lib/format';
-import { HttpError } from './http';
+import { HttpError, MSG } from './http';
 
 /**
  * On SQLSTATE 23P01 find the first session that overlaps [start, end) and name it (§6).
@@ -41,12 +41,17 @@ export async function overlapError(
   );
 }
 
+/** The 24-hour rule, whether caught here or by the database's check (SQLSTATE 23514). */
+export function sessionTooLong(): HttpError {
+  return new HttpError(400, 'VALIDATION', 'A single session can be at most 24 hours. Split it into two entries.', 'ended_at');
+}
+
 const FIVE_YEARS_MS = 5 * 365.25 * 24 * 3600 * 1000;
 
 /** §6 "Sessions (manual add and edit)" checks on a closed range. */
 export function validateClosedRange(start: Date, end: Date, nowMs: number, opts: { manual: boolean }) {
   if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) {
-    throw new HttpError(400, 'VALIDATION', "That request wasn't valid.");
+    throw new HttpError(400, 'VALIDATION', MSG.badRequest);
   }
   if (start.getTime() > nowMs || end.getTime() > nowMs) {
     throw new HttpError(400, 'VALIDATION', "Times can't be in the future.", end.getTime() > nowMs ? 'ended_at' : 'started_at');
@@ -55,7 +60,7 @@ export function validateClosedRange(start: Date, end: Date, nowMs: number, opts:
     throw new HttpError(400, 'VALIDATION', 'The end time has to be after the start time.', 'ended_at');
   }
   if (end.getTime() - start.getTime() > 24 * 3600 * 1000) {
-    throw new HttpError(400, 'VALIDATION', 'A single session can be at most 24 hours. Split it into two entries.', 'ended_at');
+    throw sessionTooLong();
   }
   if (opts.manual && end.getTime() - start.getTime() < 60 * 1000) {
     throw new HttpError(400, 'VALIDATION', 'Entries need to be at least 1 minute long.', 'ended_at');

@@ -1,18 +1,18 @@
 import { z } from 'zod';
-import { open, body, json, errorResponse } from '@/lib/server/http';
+import { open, body, json, errorResponse, newPassword, MSG } from '@/lib/server/http';
 import { userClient } from '@/lib/server/supabase';
 import { clientIp, take } from '@/lib/server/ratelimit';
 
 const Body = z.strictObject({
   token_hash: z.string().min(1),
   type: z.literal('recovery'),
-  password: z.string().min(10, 'Use at least 10 characters.').max(72, 'Use 72 characters or fewer.'),
+  password: newPassword,
 });
 
 /** F1 step 7. The token is verified only here (never on page load), then the password is set. */
 export const POST = open(async (req) => {
   if (!take(`setpw:${clientIp(req.headers)}`, 10, 15 * 60_000)) {
-    return errorResponse(429, 'RATE_LIMITED', 'Too many attempts. Wait 15 minutes and try again.');
+    return errorResponse(429, 'RATE_LIMITED', MSG.tooManyAttempts);
   }
   const { token_hash, password } = await body(req, Body);
   const supabase = await userClient();

@@ -1,10 +1,15 @@
 import 'server-only';
 import type { SupabaseClient } from '@supabase/supabase-js';
+import { z } from 'zod';
 import { HttpError, dbFail, MSG } from './http';
 import { ilikeExact } from './rows';
 
 export const TASK_NAME_MAX = 80;
 export const PROJECT_NAME_MAX = 60;
+
+/** Name fields of the task and project create/edit bodies. */
+export const taskName = z.string().trim().min(1, 'Give the task a name.').max(TASK_NAME_MAX, 'Keep task names under 80 characters.');
+export const projectName = z.string().trim().min(1, 'Give the project a name.').max(PROJECT_NAME_MAX, 'Keep project names under 60 characters.');
 
 export function cleanTaskName(raw: string): string {
   const name = raw.trim();
@@ -50,6 +55,13 @@ export async function resolveTaskByName(
     return { id: found.id, name: found.name, unarchived: true, created: false };
   }
   return { id: found.id, name: found.name, unarchived: false, created: false };
+}
+
+/** A picked task must still exist (Add time, Edit session). */
+export async function assertTaskExists(supabase: SupabaseClient, id: string): Promise<void> {
+  const { data, error } = await supabase.from('tasks').select('id').eq('id', id).maybeSingle();
+  if (error) dbFail(error, 'tasks.get');
+  if (!data) throw new HttpError(404, 'NOT_FOUND', 'That task no longer exists. Pick another or type a new one.', 'task_id');
 }
 
 /** The task currently on the clock (running or paused), with its project. */

@@ -1,16 +1,15 @@
 import { z } from 'zod';
-import { open, body, json, errorResponse } from '@/lib/server/http';
+import { open, body, json, errorResponse, emailAddress, MSG } from '@/lib/server/http';
 import { adminClient } from '@/lib/server/supabase';
 import { clientIp, take } from '@/lib/server/ratelimit';
 import { env } from '@/lib/server/env';
 import { log } from '@/lib/server/log';
-import { sendLogged } from '@/lib/server/email/send';
+import { recentEmailCount, sendLogged } from '@/lib/server/email/send';
 import { passwordLinkEmail } from '@/lib/server/email/templates';
 
 const Body = z.strictObject({
-  email: z.string().trim().min(1, 'Enter your email address.').email("That doesn't look like an email address."),
+  email: emailAddress,
 });
-const TOO_MANY = 'Too many attempts. Wait 15 minutes and try again.';
 
 async function findUser(email: string) {
   const db = adminClient();
@@ -26,17 +25,16 @@ async function findUser(email: string) {
 
 /** F1 step 3. Always 202 with the same copy whether or not the address has an account. */
 export const POST = open(async (req) => {
-  if (!take(`link:${clientIp(req.headers)}`, 3, 60 * 60_000)) return errorResponse(429, 'RATE_LIMITED', TOO_MANY);
+  if (!take(`link:${clientIp(req.headers)}`, 3, 60 * 60_000)) return errorResponse(429, 'RATE_LIMITED', MSG.tooManyAttempts);
   const { email } = await body(req, Body);
   const user = await findUser(email);
   if (user?.email) {
     const db = adminClient();
-    const since = (ms: number) => new Date(Date.now() - ms).toISOString();
     const [hour, day] = await Promise.all([
-      db.from('email_log').select('id', { count: 'exact', head: true }).eq('user_id', user.id).eq('kind', 'password_link').eq('is_example', false).gte('created_at', since(3600_000)),
-      db.from('email_log').select('id', { count: 'exact', head: true }).eq('user_id', user.id).eq('kind', 'password_link').eq('is_example', false).gte('created_at', since(86400_000)),
+      recentEmailCount(user.id, 'password_link', 3600_000),
+      recentEmailCount(user.id, 'password_link', 86400_000),
     ]);
-    if ((hour.count ?? 0) >= 3 || (day.count ?? 0) >= 10) return errorResponse(429, 'RATE_LIMITED', TOO_MANY);
+    if (hour >= 3 || day >= 10) return errorResponse(429, 'RATE_LIMITED', MSG.tooManyAttempts);
     const { data: st } = await db.from('user_settings').select('time_zone').eq('user_id', user.id).maybeSingle();
     let link = `${env.appUrl}/set-password`;
     if (env.postmarkToken) {

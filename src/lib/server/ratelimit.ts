@@ -23,10 +23,6 @@ export function take(key: string, limit: number, windowMs: number, now = Date.no
   return true;
 }
 
-export function resetBuckets() {
-  buckets.clear();
-}
-
 /**
  * Client IP: the LAST address in X-Forwarded-For (appended by Railway's proxy), never the
  * first (a client can forge it). Falls back to x-real-ip, then "unknown".

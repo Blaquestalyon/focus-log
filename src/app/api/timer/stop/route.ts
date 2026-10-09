@@ -1,8 +1,8 @@
 import { z } from 'zod';
-import { authed, body, json } from '@/lib/server/http';
+import { authed, body, json, MSG } from '@/lib/server/http';
 import { timerRpc } from '@/lib/server/timer';
 
-const Body = z.strictObject({ stop_at: z.string().datetime({ offset: true, message: "That request wasn't valid." }).optional() });
+const Body = z.strictObject({ stop_at: z.string().datetime({ offset: true, message: MSG.badRequest }).optional() });
 
 export const POST = authed(async ({ req, supabase, user }) => {
   const { stop_at } = await body(req, Body);

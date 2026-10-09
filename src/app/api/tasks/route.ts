@@ -1,5 +1,6 @@
 import { z } from 'zod';
-import { authed, body, json, dbFail, uuid, HttpError } from '@/lib/server/http';
+import { authed, body, json, dbFail, uuid, HttpError, MSG } from '@/lib/server/http';
+import { taskName } from '@/lib/server/tasks';
 import { listTasks, duplicateTaskError } from './helpers';
 
 export const dynamic = 'force-dynamic';
@@ -7,7 +8,7 @@ export const dynamic = 'force-dynamic';
 export const GET = authed(async ({ req, supabase }) => {
   const sp = req.nextUrl.searchParams;
   const pid = sp.get('project_id');
-  if (pid && pid !== 'none' && !uuid.safeParse(pid).success) throw new HttpError(400, 'VALIDATION', "That request wasn't valid.", 'project_id');
+  if (pid && pid !== 'none' && !uuid.safeParse(pid).success) throw new HttpError(400, 'VALIDATION', MSG.badRequest, 'project_id');
   return json(
     await listTasks(supabase, {
       q: (sp.get('q') ?? '').trim().slice(0, 80) || undefined,
@@ -19,7 +20,7 @@ export const GET = authed(async ({ req, supabase }) => {
 });
 
 const Create = z.strictObject({
-  name: z.string().trim().min(1, 'Give the task a name.').max(80, 'Keep task names under 80 characters.'),
+  name: taskName,
   project_id: uuid.nullable(),
 });
 

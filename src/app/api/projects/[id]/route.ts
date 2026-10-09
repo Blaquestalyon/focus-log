@@ -1,20 +1,20 @@
 import { z } from 'zod';
 import { NextResponse } from 'next/server';
-import { authed, body, json, dbFail, HttpError, MSG, uuid } from '@/lib/server/http';
+import { authed, assertId, body, json, dbFail, HttpError, MSG } from '@/lib/server/http';
 import { PROJECT_COLORS } from '@/lib/types';
-import { taskOnClock } from '@/lib/server/tasks';
+import { projectName, taskOnClock } from '@/lib/server/tasks';
 import { listProjects } from '../helpers';
 
 type P = { id: string };
 
 const Patch = z.strictObject({
-  name: z.string().trim().min(1, 'Give the project a name.').max(60, 'Keep project names under 60 characters.').optional(),
+  name: projectName.optional(),
   color: z.enum(PROJECT_COLORS).optional(),
   archived: z.boolean().optional(),
 });
 
 export const PATCH = authed<P>(async ({ req, supabase, user }, { id }) => {
-  if (!uuid.safeParse(id).success) throw new HttpError(404, 'NOT_FOUND', MSG.notFound);
+  assertId(id);
   const b = await body(req, Patch);
   const { data: cur, error } = await supabase.from('projects').select('id,name,archived_at').eq('id', id).maybeSingle();
   if (error) dbFail(error, 'projects.get');
@@ -51,8 +51,10 @@ export const PATCH = authed<P>(async ({ req, supabase, user }, { id }) => {
   return json(item);
 });
 
+const HAS_SESSIONS = "This project has logged time, so it can't be deleted. Archive it instead to hide it.";
+
 export const DELETE = authed<P>(async ({ supabase, user }, { id }) => {
-  if (!uuid.safeParse(id).success) throw new HttpError(404, 'NOT_FOUND', MSG.notFound);
+  assertId(id);
   const { data: cur, error } = await supabase.from('projects').select('id').eq('id', id).maybeSingle();
   if (error) dbFail(error, 'projects.get');
   if (!cur) throw new HttpError(404, 'NOT_FOUND', MSG.notFound);
@@ -63,12 +65,12 @@ export const DELETE = authed<P>(async ({ supabase, user }, { id }) => {
   const { count, error: cErr } = await supabase.from('session_rows').select('id', { count: 'exact', head: true }).eq('project_id', id);
   if (cErr) dbFail(cErr, 'projects.sessions');
   if ((count ?? 0) > 0) {
-    throw new HttpError(409, 'HAS_SESSIONS', "This project has logged time, so it can't be deleted. Archive it instead to hide it.");
+    throw new HttpError(409, 'HAS_SESSIONS', HAS_SESSIONS);
   }
   const del = await supabase.from('projects').delete().eq('id', id);
   if (del.error) {
     if (del.error.code === '23503') {
-      throw new HttpError(409, 'HAS_SESSIONS', "This project has logged time, so it can't be deleted. Archive it instead to hide it.");
+      throw new HttpError(409, 'HAS_SESSIONS', HAS_SESSIONS);
     }
     dbFail(del.error, 'projects.delete');
   }

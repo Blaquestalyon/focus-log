@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { authed, body, json, dbFail, HttpError } from '@/lib/server/http';
 import { PROJECT_COLORS } from '@/lib/types';
+import { projectName } from '@/lib/server/tasks';
 import { listProjects } from './helpers';
 
 export const dynamic = 'force-dynamic';
@@ -11,7 +12,7 @@ export const GET = authed(async ({ req, supabase }) => {
 });
 
 const Create = z.strictObject({
-  name: z.string().trim().min(1, 'Give the project a name.').max(60, 'Keep project names under 60 characters.'),
+  name: projectName,
   color: z.enum(PROJECT_COLORS).default('azure'),
 });
 

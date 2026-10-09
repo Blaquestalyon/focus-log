@@ -1,10 +1,10 @@
 import { z } from 'zod';
-import { authed, body, json, uuid, dbFail, HttpError } from '@/lib/server/http';
+import { authed, body, json, uuid, dbFail } from '@/lib/server/http';
 import { getSettingsRow } from '@/lib/server/settings';
 import { VIEW_COLUMNS, toSessionRow, fetchAll, loadViewRow, rowEndMs, type ViewRow } from '@/lib/server/rows';
 import { applyFilters, decodeCursor, encodeCursor, parseFilters } from '@/lib/server/history';
-import { resolveTaskByName } from '@/lib/server/tasks';
-import { overlapError, validateClosedRange } from '@/lib/server/overlap';
+import { assertTaskExists, resolveTaskByName } from '@/lib/server/tasks';
+import { overlapError, sessionTooLong, validateClosedRange } from '@/lib/server/overlap';
 import { localDateStr } from '@/lib/time';
 import type { SessionsResponse } from '@/lib/types';
 
@@ -107,9 +107,7 @@ export const POST = authed(async ({ req, supabase, user }) => {
   validateClosedRange(start, end, Date.now(), { manual: true });
   let taskId: string;
   if ('task_id' in b) {
-    const { data, error } = await supabase.from('tasks').select('id').eq('id', b.task_id).maybeSingle();
-    if (error) dbFail(error, 'tasks.get');
-    if (!data) throw new HttpError(404, 'NOT_FOUND', 'That task no longer exists. Pick another or type a new one.', 'task_id');
+    await assertTaskExists(supabase, b.task_id);
     taskId = b.task_id;
   } else {
     taskId = (await resolveTaskByName(supabase, b.task_name, b.project_id)).id;
@@ -124,7 +122,7 @@ export const POST = authed(async ({ req, supabase, user }) => {
       const st = await getSettingsRow(supabase, user.id);
       throw await overlapError(supabase, start, end, st.time_zone);
     }
-    if (error.code === '23514') throw new HttpError(400, 'VALIDATION', 'A single session can be at most 24 hours. Split it into two entries.', 'ended_at');
+    if (error.code === '23514') throw sessionTooLong();
     dbFail(error, 'sessions.insert');
   }
   const row = await loadViewRow(supabase, data.id);

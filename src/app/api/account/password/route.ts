@@ -1,11 +1,11 @@
 import { z } from 'zod';
 import { NextResponse } from 'next/server';
-import { authed, body, errorResponse } from '@/lib/server/http';
+import { authed, body, errorResponse, newPassword } from '@/lib/server/http';
 import { bareAnonClient } from '@/lib/server/supabase';
 
 const Body = z.strictObject({
   current_password: z.string().min(1, 'Enter your current password.'),
-  new_password: z.string().min(10, 'Use at least 10 characters.').max(72, 'Use 72 characters or fewer.'),
+  new_password: newPassword,
 });
 
 export const POST = authed(async ({ req, supabase, user }) => {

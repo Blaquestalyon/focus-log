@@ -23,6 +23,18 @@ export async function sentThisMonth(userId: string, tz: string): Promise<number>
   return count ?? 0;
 }
 
+/** Non-example emails of `kind` logged in the last `ms` (per-account send limits, §6). */
+export async function recentEmailCount(userId: string, kind: EmailKind, ms: number): Promise<number> {
+  const { count } = await adminClient()
+    .from('email_log')
+    .select('id', { count: 'exact', head: true })
+    .eq('user_id', userId)
+    .eq('kind', kind)
+    .eq('is_example', false)
+    .gte('created_at', new Date(Date.now() - ms).toISOString());
+  return count ?? 0;
+}
+
 export function capMessage(cap: number) {
   return `Monthly email cap reached (${cap}). Raise EMAIL_MONTHLY_CAP to send more.`;
 }

@@ -144,5 +144,3 @@ export function computeReport(
 export function exactShare(seconds: number, total: number): number {
   return total ? (seconds / total) * 100 : 0;
 }
-
-export { addMonths };

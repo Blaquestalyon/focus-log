@@ -19,6 +19,7 @@ export const MSG = {
   server: 'Something went wrong on our side. Try again in a moment.',
   slowDown: 'Slow down a moment and try again.',
   badRequest: "That request wasn't valid.",
+  tooManyAttempts: 'Too many attempts. Wait 15 minutes and try again.',
 };
 
 export function json(data: unknown, status = 200, headers?: HeadersInit) {
@@ -102,6 +103,14 @@ export async function body<T extends z.ZodType>(req: NextRequest, schema: T): Pr
 }
 
 export const uuid = z.string().uuid(MSG.badRequest);
+
+/** A path id that isn't a UUID can't name a row: 404 like a missing one. */
+export function assertId(id: string): void {
+  if (!uuid.safeParse(id).success) throw new HttpError(404, 'NOT_FOUND', MSG.notFound);
+}
+
+export const emailAddress = z.string().trim().min(1, 'Enter your email address.').email("That doesn't look like an email address.");
+export const newPassword = z.string().min(10, 'Use at least 10 characters.').max(72, 'Use 72 characters or fewer.');
 
 /** Throw a mapped HttpError for a database error, or a 500. */
 export function dbFail(error: { code?: string; message?: string } | null, context: string): never {

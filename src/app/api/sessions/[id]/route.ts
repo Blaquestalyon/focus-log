@@ -1,9 +1,10 @@
 import { z } from 'zod';
 import { NextResponse } from 'next/server';
-import { authed, body, json, uuid, dbFail, HttpError, MSG } from '@/lib/server/http';
+import { authed, assertId, body, json, uuid, dbFail, HttpError, MSG } from '@/lib/server/http';
 import { getSettingsRow } from '@/lib/server/settings';
 import { toSessionRow, loadViewRow } from '@/lib/server/rows';
-import { overlapError, validateClosedRange } from '@/lib/server/overlap';
+import { overlapError, sessionTooLong, validateClosedRange } from '@/lib/server/overlap';
+import { assertTaskExists } from '@/lib/server/tasks';
 
 const Patch = z.strictObject({
   task_id: uuid.optional(),
@@ -15,7 +16,7 @@ type P = { id: string };
 
 /** One session (used by History's `?session=<id>` deep link). */
 export const GET = authed<P>(async ({ supabase }, { id }) => {
-  if (!uuid.safeParse(id).success) throw new HttpError(404, 'NOT_FOUND', MSG.notFound);
+  assertId(id);
   const row = await loadViewRow(supabase, id);
   if (!row) throw new HttpError(404, 'NOT_FOUND', MSG.notFound);
   return json(toSessionRow(row, Date.now()));
@@ -23,7 +24,7 @@ export const GET = authed<P>(async ({ supabase }, { id }) => {
 
 /** F11 Edit a session (or the running session's start time). */
 export const PATCH = authed<P>(async ({ req, supabase, user }, { id }) => {
-  if (!uuid.safeParse(id).success) throw new HttpError(404, 'NOT_FOUND', MSG.notFound);
+  assertId(id);
   const b = await body(req, Patch);
   const cur = await loadViewRow(supabase, id);
   if (!cur) throw new HttpError(404, 'NOT_FOUND', MSG.notFound);
@@ -46,9 +47,7 @@ export const PATCH = authed<P>(async ({ req, supabase, user }, { id }) => {
     if (s.getTime() !== Date.parse(cur.started_at)) update.started_at = s.toISOString();
     if (e.getTime() !== Date.parse(cur.ended_at)) update.ended_at = e.toISOString();
     if (b.task_id && b.task_id !== cur.task_id) {
-      const { data, error } = await supabase.from('tasks').select('id').eq('id', b.task_id).maybeSingle();
-      if (error) dbFail(error, 'tasks.get');
-      if (!data) throw new HttpError(404, 'NOT_FOUND', 'That task no longer exists. Pick another or type a new one.', 'task_id');
+      await assertTaskExists(supabase, b.task_id);
       update.task_id = b.task_id;
     }
   }
@@ -61,9 +60,7 @@ export const PATCH = authed<P>(async ({ req, supabase, user }, { id }) => {
         const e = cur.ended_at ? new Date((update.ended_at as string) ?? cur.ended_at) : null;
         throw await overlapError(supabase, s, e, st.time_zone, id);
       }
-      if (error.code === '23514') {
-        throw new HttpError(400, 'VALIDATION', 'A single session can be at most 24 hours. Split it into two entries.', 'ended_at');
-      }
+      if (error.code === '23514') throw sessionTooLong();
       dbFail(error, 'sessions.update');
     }
   }
@@ -74,7 +71,7 @@ export const PATCH = authed<P>(async ({ req, supabase, user }, { id }) => {
 
 /** F12 Delete a closed session. */
 export const DELETE = authed<P>(async ({ supabase }, { id }) => {
-  if (!uuid.safeParse(id).success) throw new HttpError(404, 'NOT_FOUND', MSG.notFound);
+  assertId(id);
   const { data, error } = await supabase.from('sessions').select('id, ended_at').eq('id', id).maybeSingle();
   if (error) dbFail(error, 'sessions.get');
   if (!data) throw new HttpError(404, 'NOT_FOUND', MSG.notFound);

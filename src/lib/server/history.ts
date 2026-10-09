@@ -1,6 +1,5 @@
 import 'server-only';
-import type { SupabaseClient } from '@supabase/supabase-js';
-import { HttpError } from './http';
+import { HttpError, MSG } from './http';
 import { addDays, isDateStr, startOfLocalDay, todayStr, type DateStr } from '@/lib/time';
 import { ilikeContains } from './rows';
 
@@ -23,7 +22,7 @@ export function parseFilters(sp: URLSearchParams, defaultRange: RangeKey = '30d'
   const rawRange = (sp.get('range') ?? defaultRange).toLowerCase();
   const range: RangeKey = (['7d', '30d', '90d', 'all', 'custom'] as const).includes(rawRange as RangeKey)
     ? (rawRange as RangeKey)
-    : (() => { throw new HttpError(400, 'VALIDATION', "That request wasn't valid.", 'range'); })();
+    : (() => { throw new HttpError(400, 'VALIDATION', MSG.badRequest, 'range'); })();
   let from: DateStr | null = null;
   let to: DateStr | null = null;
   if (range === 'custom') {
@@ -37,11 +36,11 @@ export function parseFilters(sp: URLSearchParams, defaultRange: RangeKey = '30d'
     .map((s) => s.trim())
     .filter(Boolean);
   for (const p of projects) {
-    if (p !== 'none' && !UUID_RE.test(p)) throw new HttpError(400, 'VALIDATION', "That request wasn't valid.", 'projects');
+    if (p !== 'none' && !UUID_RE.test(p)) throw new HttpError(400, 'VALIDATION', MSG.badRequest, 'projects');
   }
   const sort = sp.get('sort') === 'duration' ? 'duration' : 'date';
   if (sp.get('sort') && !['date', 'duration'].includes(sp.get('sort')!)) {
-    throw new HttpError(400, 'VALIDATION', "That request wasn't valid.", 'sort');
+    throw new HttpError(400, 'VALIDATION', MSG.badRequest, 'sort');
   }
   return { q, range, from, to, projects, sort };
 }
@@ -79,10 +78,6 @@ export function applyFilters<Q extends { or: any; gte: any; lt: any; in: any; is
   return q;
 }
 
-export function isDefaultFilters(f: SessionFilters): boolean {
-  return !f.q && f.range === '30d' && !f.projects.length;
-}
-
 export function encodeCursor(value: string | number, id: string): string {
   return Buffer.from(JSON.stringify([value, id])).toString('base64url');
 }
@@ -95,7 +90,5 @@ export function decodeCursor(c: string | null): [string | number, string] | null
   } catch {
     /* fall through */
   }
-  throw new HttpError(400, 'VALIDATION', "That request wasn't valid.", 'cursor');
+  throw new HttpError(400, 'VALIDATION', MSG.badRequest, 'cursor');
 }
-
-export type { SupabaseClient };

@@ -1,19 +1,19 @@
 import { z } from 'zod';
 import { NextResponse } from 'next/server';
-import { authed, body, json, dbFail, HttpError, MSG, uuid } from '@/lib/server/http';
-import { taskOnClock } from '@/lib/server/tasks';
+import { authed, assertId, body, json, dbFail, HttpError, MSG, uuid } from '@/lib/server/http';
+import { taskOnClock, taskName } from '@/lib/server/tasks';
 import { listTasks, duplicateTaskError } from '../helpers';
 
 type P = { id: string };
 
 const Patch = z.strictObject({
-  name: z.string().trim().min(1, 'Give the task a name.').max(80, 'Keep task names under 80 characters.').optional(),
+  name: taskName.optional(),
   project_id: uuid.nullable().optional(),
   archived: z.boolean().optional(),
 });
 
 export const PATCH = authed<P>(async ({ req, supabase, user }, { id }) => {
-  if (!uuid.safeParse(id).success) throw new HttpError(404, 'NOT_FOUND', MSG.notFound);
+  assertId(id);
   const b = await body(req, Patch);
   const { data: cur, error } = await supabase.from('tasks').select('id,name,project_id,archived_at').eq('id', id).maybeSingle();
   if (error) dbFail(error, 'tasks.get');
@@ -42,8 +42,10 @@ export const PATCH = authed<P>(async ({ req, supabase, user }, { id }) => {
   return json(item);
 });
 
+const HAS_SESSIONS = "This task has logged time, so it can't be deleted. Archive it instead to hide it.";
+
 export const DELETE = authed<P>(async ({ supabase, user }, { id }) => {
-  if (!uuid.safeParse(id).success) throw new HttpError(404, 'NOT_FOUND', MSG.notFound);
+  assertId(id);
   const { data: cur, error } = await supabase.from('tasks').select('id,name').eq('id', id).maybeSingle();
   if (error) dbFail(error, 'tasks.get');
   if (!cur) throw new HttpError(404, 'NOT_FOUND', MSG.notFound);
@@ -51,11 +53,11 @@ export const DELETE = authed<P>(async ({ supabase, user }, { id }) => {
   if (onClock && onClock.id === id) throw new HttpError(409, 'ON_CLOCK', `Stop the timer first — ${cur.name} is on the clock.`);
   const { count } = await supabase.from('sessions').select('id', { count: 'exact', head: true }).eq('task_id', id);
   if ((count ?? 0) > 0) {
-    throw new HttpError(409, 'HAS_SESSIONS', "This task has logged time, so it can't be deleted. Archive it instead to hide it.");
+    throw new HttpError(409, 'HAS_SESSIONS', HAS_SESSIONS);
   }
   const del = await supabase.from('tasks').delete().eq('id', id);
   if (del.error) {
-    if (del.error.code === '23503') throw new HttpError(409, 'HAS_SESSIONS', "This task has logged time, so it can't be deleted. Archive it instead to hide it.");
+    if (del.error.code === '23503') throw new HttpError(409, 'HAS_SESSIONS', HAS_SESSIONS);
     dbFail(del.error, 'tasks.delete');
   }
   return new NextResponse(null, { status: 204 });
