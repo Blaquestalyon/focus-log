@@ -1,8 +1,8 @@
 import 'server-only';
 import type { SupabaseClient } from '@supabase/supabase-js';
-import { dbFail } from '@/lib/server/http';
+import { dbFail, HttpError } from '@/lib/server/http';
 import { fetchAll } from '@/lib/server/rows';
-import { elapsedSeconds } from '@/lib/time';
+import { rowSeconds } from '@/lib/time';
 import type { ProjectColor, ProjectItem } from '@/lib/types';
 
 export async function listProjects(supabase: SupabaseClient, includeArchived: boolean, onlyId?: string): Promise<ProjectItem[]> {
@@ -31,8 +31,7 @@ export async function listProjects(supabase: SupabaseClient, includeArchived: bo
   const totals = new Map<string, number>();
   for (const s of sessions) {
     if (!s.project_id) continue;
-    const sec = s.duration_seconds ?? elapsedSeconds(Date.parse(s.started_at), now);
-    totals.set(s.project_id, (totals.get(s.project_id) ?? 0) + sec);
+    totals.set(s.project_id, (totals.get(s.project_id) ?? 0) + rowSeconds(s, now));
   }
   return (projects ?? []).map((p) => ({
     id: p.id,
@@ -44,4 +43,8 @@ export async function listProjects(supabase: SupabaseClient, includeArchived: bo
     last_used_at: lastUsed.get(p.id) ?? null,
     is_example: p.is_example,
   }));
+}
+
+export function duplicateProjectError(name: string): HttpError {
+  return new HttpError(409, 'DUPLICATE_NAME', `You already have a project called "${name}".`, 'name');
 }

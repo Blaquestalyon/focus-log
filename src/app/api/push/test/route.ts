@@ -1,11 +1,11 @@
 import { authed, json, errorResponse, dbFail } from '@/lib/server/http';
 import { env } from '@/lib/server/env';
 import { take } from '@/lib/server/ratelimit';
-import { sendAlert, storePushError, TEST_PAYLOAD } from '@/lib/server/push';
+import { sendAlert, storePushError, PUSH_NOT_CONFIGURED_HUMAN, TEST_PAYLOAD } from '@/lib/server/push';
 
 /** Send a test alert to this browser (does not touch the nudge_* fields). */
 export const POST = authed(async ({ req, supabase, user }) => {
-  if (!env.vapidConfigured) return errorResponse(503, 'PUSH_NOT_CONFIGURED', "Pop-up alerts aren't set up yet.");
+  if (!env.vapidConfigured) return errorResponse(503, 'PUSH_NOT_CONFIGURED', PUSH_NOT_CONFIGURED_HUMAN);
   const endpoint = req.headers.get('x-push-endpoint');
   const { data: sub, error } = endpoint
     ? await supabase.from('push_subscriptions').select('id,endpoint,p256dh,auth_secret').eq('endpoint', endpoint).maybeSingle()

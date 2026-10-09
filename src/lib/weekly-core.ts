@@ -1,9 +1,9 @@
 /** Pure Monday-summary logic (§6 "Weekly summary"). Unit tested with fixed clocks. */
 import { TZDate } from '@date-fns/tz';
 import type { ProjectColor } from './types';
-import { addDays, clipSeconds, localDateStr, mondayOf, rowEndMs, startOfLocalDay, weekRange, type DateStr } from './time';
+import { addDays, clipRowSeconds, clipSeconds, dayRange, localDateStr, mondayOf, rowEndMs, weekRange, type DateStr } from './time';
 import { formatDuration } from './format';
-import type { ReportRow } from './report-core';
+import { exactShare, type ReportRow } from './report-core';
 
 /** Due when it is Monday between 08:00 and 23:59 in `tz`. */
 export function isWeeklyDue(now: Date | number, tz: string): boolean {
@@ -37,7 +37,6 @@ export function buildWeeklySummary(allRows: ReportRow[], monday: DateStr, tz: st
   const rows = allRows.filter((r) => !r.is_example);
   const { start, end } = weekRange(monday, tz);
   const prev = weekRange(addDays(monday, -7), tz);
-  const endOf = (r: ReportRow) => new Date(rowEndMs(r, nowMs));
 
   let total = 0;
   let previous = 0;
@@ -46,7 +45,7 @@ export function buildWeeklySummary(allRows: ReportRow[], monday: DateStr, tz: st
   let runningAtEnd = false;
   for (const r of rows) {
     const s = new Date(r.started_at);
-    const e = endOf(r);
+    const e = new Date(rowEndMs(r, nowMs));
     previous += clipSeconds(s, e, prev.start, prev.end);
     const sec = clipSeconds(s, e, start, end);
     if (!sec) continue;
@@ -67,15 +66,12 @@ export function buildWeeklySummary(allRows: ReportRow[], monday: DateStr, tz: st
     tasks.set(r.task_id, t);
   }
   const projectList = [...projects.values()]
-    .map((p) => ({ ...p, share: total ? Math.round((p.seconds / total) * 100) : 0 }))
+    .map((p) => ({ ...p, share: Math.round(exactShare(p.seconds, total)) }))
     .sort((a, b) => (a.id === null ? 1 : b.id === null ? -1 : b.seconds - a.seconds));
   const days = Array.from({ length: 7 }, (_, i) => {
     const date = addDays(monday, i);
-    const ds = startOfLocalDay(date, tz);
-    const de = startOfLocalDay(addDays(date, 1), tz);
-    let seconds = 0;
-    for (const r of rows) seconds += clipSeconds(new Date(r.started_at), endOf(r), ds, de);
-    return { date, seconds };
+    const { start: ds, end: de } = dayRange(date, tz);
+    return { date, seconds: rows.reduce((t, r) => t + clipRowSeconds(r, ds, de, nowMs), 0) };
   });
   const realProjects = projectList.filter((p) => p.id !== null).length;
   return {

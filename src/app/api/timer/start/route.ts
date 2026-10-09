@@ -1,11 +1,11 @@
 import { z } from 'zod';
 import { authed, body, json, uuid } from '@/lib/server/http';
 import { timerRpc } from '@/lib/server/timer';
-import { resolveTaskByName } from '@/lib/server/tasks';
+import { resolveTaskByName, TASK_NAME_TOO_LONG } from '@/lib/server/tasks';
 
 const Body = z.union([
   z.strictObject({ task_id: uuid }),
-  z.strictObject({ task_name: z.string().max(200, 'Keep task names under 80 characters.'), project_id: uuid.nullable() }),
+  z.strictObject({ task_name: z.string().max(200, TASK_NAME_TOO_LONG), project_id: uuid.nullable() }),
 ]);
 
 /** F3/F4: start by id, or by name under a project (reusing/unarchiving an existing task). */

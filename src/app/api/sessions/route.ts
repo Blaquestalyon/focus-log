@@ -20,7 +20,9 @@ export const GET = authed(async ({ req, supabase, user }) => {
   const tz = st.time_zone;
   const now = Date.now();
 
-  let rows: ViewRow[] = [];
+  let rows: ViewRow[];
+  // In duration order the running row is pinned on top and does not take a paging slot.
+  let pinned: ViewRow[] = [];
   if (f.sort === 'date') {
     let q = applyFilters(supabase.from('session_rows').select(VIEW_COLUMNS), f, tz, now);
     if (cursor) {
@@ -31,7 +33,6 @@ export const GET = authed(async ({ req, supabase, user }) => {
     if (error) dbFail(error, 'sessions.list');
     rows = data as ViewRow[];
   } else {
-    let pinned: ViewRow[] = [];
     if (!cursor) {
       const { data, error } = await applyFilters(supabase.from('session_rows').select(VIEW_COLUMNS), f, tz, now).is('ended_at', null);
       if (error) dbFail(error, 'sessions.running');
@@ -44,22 +45,13 @@ export const GET = authed(async ({ req, supabase, user }) => {
     }
     const { data, error } = await q.order('duration_seconds', { ascending: false }).order('id', { ascending: false }).limit(limit + 1);
     if (error) dbFail(error, 'sessions.list');
-    rows = [...pinned, ...(data as ViewRow[])];
-    if (pinned.length) {
-      // the pinned running row does not take a paging slot
-      const page = data as ViewRow[];
-      const hasMore = page.length > limit;
-      const slice = page.slice(0, limit);
-      rows = [...pinned, ...slice];
-      const last = slice[slice.length - 1];
-      return json(await finish(rows, hasMore && last ? encodeCursor(last.duration_seconds ?? 0, last.id) : null));
-    }
+    rows = data as ViewRow[];
   }
   const hasMore = rows.length > limit;
   const page = rows.slice(0, limit);
   const last = page[page.length - 1];
   const next = hasMore && last ? (f.sort === 'date' ? encodeCursor(last.started_at, last.id) : encodeCursor(last.duration_seconds ?? 0, last.id)) : null;
-  return json(await finish(page, next));
+  return json(await finish([...pinned, ...page], next));
 
   async function finish(page: ViewRow[], next_cursor: string | null): Promise<SessionsResponse> {
     const all = await fetchAll<{ started_at: string; ended_at: string | null; duration_seconds: number | null }>(

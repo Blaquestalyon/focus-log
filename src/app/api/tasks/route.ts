@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { authed, body, json, dbFail, uuid, HttpError, MSG } from '@/lib/server/http';
 import { taskName } from '@/lib/server/tasks';
-import { listTasks, duplicateTaskError } from './helpers';
+import { listTasks, duplicateTaskError, projectGone } from './helpers';
 
 export const dynamic = 'force-dynamic';
 
@@ -29,7 +29,7 @@ export const POST = authed(async ({ req, supabase }) => {
   const { data, error } = await supabase.from('tasks').insert({ name: b.name, project_id: b.project_id }).select('id').single();
   if (error) {
     if (error.code === '23505') throw await duplicateTaskError(supabase, b.name, b.project_id);
-    if (error.code === '42501' || error.code === '23503') throw new HttpError(404, 'NOT_FOUND', 'That project no longer exists.', 'project_id');
+    if (error.code === '42501' || error.code === '23503') throw projectGone();
     dbFail(error, 'tasks.insert');
   }
   const [item] = await listTasks(supabase, { onlyId: data.id, includeArchived: true });

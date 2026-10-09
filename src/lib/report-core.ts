@@ -5,8 +5,7 @@
  */
 import type { ProjectColor, ReportResponse } from './types';
 import {
-  addDays, addMonths, clipSeconds, daysInMonth, firstOfMonth, mondayOf, monthRange, rowEndMs, todayStr, weekRange,
-  startOfLocalDay, type DateStr,
+  addDays, addMonths, clipRowSeconds, dayRange, daysInMonth, firstOfMonth, mondayOf, monthRange, todayStr, weekRange, type DateStr,
 } from './time';
 import { formatMonth, formatWeekRange } from './format';
 
@@ -49,11 +48,7 @@ export function validatePeriodStart(period: Period, start: string | null, tz: st
 }
 
 function sumClipped(rows: ReportRow[], s: Date, e: Date, nowMs: number): number {
-  let t = 0;
-  for (const r of rows) {
-    t += clipSeconds(new Date(r.started_at), new Date(rowEndMs(r, nowMs)), s, e);
-  }
-  return t;
+  return rows.reduce((t, r) => t + clipRowSeconds(r, s, e, nowMs), 0);
 }
 
 export function computeReport(
@@ -70,12 +65,12 @@ export function computeReport(
     (r) => !r.ended_at && Date.parse(r.started_at) < range.end.getTime() && nowMs > range.start.getTime(),
   );
 
-  const dayBounds = dates.map((d) => ({ date: d, s: startOfLocalDay(d, tz), e: startOfLocalDay(addDays(d, 1), tz) }));
-  const days = dayBounds.map(({ date, s, e }) => {
+  const days = dates.map((date) => {
+    const { start: s, end: e } = dayRange(date, tz);
     const byProject = new Map<string | null, number>();
     let dayTotal = 0;
     for (const r of rows) {
-      const sec = clipSeconds(new Date(r.started_at), new Date(rowEndMs(r, nowMs)), s, e);
+      const sec = clipRowSeconds(r, s, e, nowMs);
       if (!sec) continue;
       dayTotal += sec;
       byProject.set(r.project_id, (byProject.get(r.project_id) ?? 0) + sec);
@@ -89,7 +84,7 @@ export function computeReport(
 
   const projects = new Map<string, ReportResponse['projects'][number] & { taskMap: Map<string, { id: string; name: string; seconds: number }> }>();
   for (const r of rows) {
-    const sec = clipSeconds(new Date(r.started_at), new Date(rowEndMs(r, nowMs)), range.start, range.end);
+    const sec = clipRowSeconds(r, range.start, range.end, nowMs);
     if (!sec) continue;
     const key = r.project_id ?? '__none__';
     let p = projects.get(key);
@@ -114,7 +109,7 @@ export function computeReport(
   const list = [...projects.values()]
     .map(({ taskMap, ...p }) => ({
       ...p,
-      share: total ? Math.round((p.seconds / total) * 100) : 0,
+      share: Math.round(exactShare(p.seconds, total)),
       tasks: [...taskMap.values()].sort((a, b) => b.seconds - a.seconds || a.name.localeCompare(b.name)),
     }))
     .sort((a, b) => {
@@ -126,7 +121,7 @@ export function computeReport(
   return {
     range: {
       start,
-      end: addDays(dates[dates.length - 1], 0),
+      end: dates[dates.length - 1],
       label: period === 'week' ? formatWeekRange(start) : formatMonth(start),
     },
     total_seconds: total,

@@ -2,7 +2,7 @@ import 'server-only';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { dbFail, HttpError } from '@/lib/server/http';
 import { fetchAll, ilikeContains } from '@/lib/server/rows';
-import { elapsedSeconds } from '@/lib/time';
+import { rowSeconds } from '@/lib/time';
 import type { ProjectColor, TaskItem } from '@/lib/types';
 
 interface Filters { q?: string; projectId?: string | null | 'none'; includeArchived?: boolean; recent?: boolean; onlyId?: string }
@@ -36,7 +36,7 @@ export async function listTasks(supabase: SupabaseClient, f: Filters): Promise<T
     for (const s of sessions) {
       const cur = stats.get(s.task_id) ?? { n: 0, s: 0 };
       cur.n += 1;
-      cur.s += s.duration_seconds ?? elapsedSeconds(Date.parse(s.started_at), now);
+      cur.s += rowSeconds(s, now);
       stats.set(s.task_id, cur);
     }
   }
@@ -59,4 +59,9 @@ export async function duplicateTaskError(supabase: SupabaseClient, name: string,
   if (!projectId) return new HttpError(409, 'DUPLICATE_NAME', `You already have a task called "${name}" with no project.`, 'name');
   const { data } = await supabase.from('projects').select('name').eq('id', projectId).maybeSingle();
   return new HttpError(409, 'DUPLICATE_NAME', `You already have a task called "${name}" in ${data?.name ?? 'that project'}.`, 'name');
+}
+
+/** The chosen project was deleted (or isn't the owner's). */
+export function projectGone(): HttpError {
+  return new HttpError(404, 'NOT_FOUND', 'That project no longer exists.', 'project_id');
 }

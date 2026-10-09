@@ -2,7 +2,7 @@ import { z } from 'zod';
 import { NextResponse } from 'next/server';
 import { authed, assertId, body, json, dbFail, HttpError, MSG, uuid } from '@/lib/server/http';
 import { taskOnClock, taskName } from '@/lib/server/tasks';
-import { listTasks, duplicateTaskError } from '../helpers';
+import { listTasks, duplicateTaskError, projectGone } from '../helpers';
 
 type P = { id: string };
 
@@ -34,7 +34,7 @@ export const PATCH = authed<P>(async ({ req, supabase, user }, { id }) => {
       if (r.error.code === '23505') {
         throw await duplicateTaskError(supabase, (b.name ?? cur.name) as string, (b.project_id !== undefined ? b.project_id : cur.project_id) as string | null);
       }
-      if (r.error.code === '42501') throw new HttpError(404, 'NOT_FOUND', 'That project no longer exists.', 'project_id');
+      if (r.error.code === '42501') throw projectGone();
       dbFail(r.error, 'tasks.update');
     }
   }

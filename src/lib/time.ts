@@ -102,9 +102,19 @@ export function rowEndMs(r: { ended_at: string | null }, nowMs: number): number 
   return r.ended_at ? Date.parse(r.ended_at) : nowMs;
 }
 
+/** A session row's seconds: its stored duration, or the time since it started while it runs. */
+export function rowSeconds(r: { duration_seconds: number | null; started_at: string }, nowMs: number): number {
+  return r.duration_seconds ?? elapsedSeconds(Date.parse(r.started_at), nowMs);
+}
+
 /** Seconds of [start, end) that fall inside [pStart, pEnd). */
 export function clipSeconds(start: Date, end: Date, pStart: Date, pEnd: Date): number {
   return elapsedSeconds(Math.max(start.getTime(), pStart.getTime()), Math.min(end.getTime(), pEnd.getTime()));
+}
+
+/** Seconds of a session row (running rows end at `nowMs`) that fall inside [pStart, pEnd). */
+export function clipRowSeconds(r: { started_at: string; ended_at: string | null }, pStart: Date, pEnd: Date, nowMs: number): number {
+  return clipSeconds(new Date(r.started_at), new Date(rowEndMs(r, nowMs)), pStart, pEnd);
 }
 
 export function todayStr(tz: string, now: Date | number = Date.now()): DateStr {
@@ -119,8 +129,7 @@ export function supportedTimeZones(): string[] {
 
 export function isValidTimeZone(tz: unknown): tz is string {
   if (typeof tz !== 'string' || !tz) return false;
-  if (supportedTimeZones().includes(tz)) return true;
-  return false;
+  return supportedTimeZones().includes(tz);
 }
 
 /** `UTC−04:00` style offset label for a zone at an instant. */

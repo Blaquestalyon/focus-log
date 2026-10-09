@@ -2,13 +2,11 @@ import { z } from 'zod';
 import { authed, body, json, dbFail, errorResponse } from '@/lib/server/http';
 import { env } from '@/lib/server/env';
 import { browserLabel } from '@/lib/push-label';
+import { PUSH_NOT_CONFIGURED_HUMAN } from '@/lib/server/push';
+import { humanError } from '@/lib/server/email/postmark';
 import type { PushBrowser } from '@/lib/types';
 
 export const dynamic = 'force-dynamic';
-
-function human(stored: string | null): string | null {
-  return stored ? stored.replace(/^\[[^\]]*\]\s*/, '') : null;
-}
 
 /** Allowed browsers. Never returns endpoint or keys; flags the row matching X-Push-Endpoint. */
 export const GET = authed(async ({ req, supabase }) => {
@@ -27,7 +25,7 @@ export const GET = authed(async ({ req, supabase }) => {
       last_seen_at: r.last_seen_at,
       last_success_at: r.last_success_at,
       last_failure_at: r.last_failure_at,
-      error_human: failedLatest ? human(r.last_error) : null,
+      error_human: failedLatest ? humanError(r.last_error) : null,
     };
   });
   return json({ configured: env.vapidConfigured, public_key: env.vapidPublicKey, browsers });
@@ -42,7 +40,7 @@ const Sub = z.object({
 
 /** Save (or re-save) this browser's push sign-up. */
 export const PUT = authed(async ({ req, supabase, user }) => {
-  if (!env.vapidConfigured) return errorResponse(503, 'PUSH_NOT_CONFIGURED', "Pop-up alerts aren't set up yet.");
+  if (!env.vapidConfigured) return errorResponse(503, 'PUSH_NOT_CONFIGURED', PUSH_NOT_CONFIGURED_HUMAN);
   let b: z.infer<typeof Sub>;
   try {
     b = await body(req, Sub);

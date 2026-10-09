@@ -3,18 +3,20 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 import { z } from 'zod';
 import { HttpError, dbFail, MSG } from './http';
 import { ilikeExact } from './rows';
+import { TIMER_ERRORS } from './timer';
 
 export const TASK_NAME_MAX = 80;
 export const PROJECT_NAME_MAX = 60;
+export const TASK_NAME_TOO_LONG = 'Keep task names under 80 characters.';
 
 /** Name fields of the task and project create/edit bodies. */
-export const taskName = z.string().trim().min(1, 'Give the task a name.').max(TASK_NAME_MAX, 'Keep task names under 80 characters.');
+export const taskName = z.string().trim().min(1, 'Give the task a name.').max(TASK_NAME_MAX, TASK_NAME_TOO_LONG);
 export const projectName = z.string().trim().min(1, 'Give the project a name.').max(PROJECT_NAME_MAX, 'Keep project names under 60 characters.');
 
 export function cleanTaskName(raw: string): string {
   const name = raw.trim();
   if (!name) throw new HttpError(400, 'VALIDATION', 'Type a task name.', 'task_name');
-  if (name.length > TASK_NAME_MAX) throw new HttpError(400, 'VALIDATION', 'Keep task names under 80 characters.', 'task_name');
+  if (name.length > TASK_NAME_MAX) throw new HttpError(400, 'VALIDATION', TASK_NAME_TOO_LONG, 'task_name');
   return name;
 }
 
@@ -61,7 +63,7 @@ export async function resolveTaskByName(
 export async function assertTaskExists(supabase: SupabaseClient, id: string): Promise<void> {
   const { data, error } = await supabase.from('tasks').select('id').eq('id', id).maybeSingle();
   if (error) dbFail(error, 'tasks.get');
-  if (!data) throw new HttpError(404, 'NOT_FOUND', 'That task no longer exists. Pick another or type a new one.', 'task_id');
+  if (!data) throw new HttpError(404, 'NOT_FOUND', TIMER_ERRORS.FL_TASK_NOT_FOUND.message, 'task_id');
 }
 
 /** The task currently on the clock (running or paused), with its project. */

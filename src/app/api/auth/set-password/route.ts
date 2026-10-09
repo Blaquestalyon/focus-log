@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { open, body, json, errorResponse, newPassword, MSG } from '@/lib/server/http';
+import { open, body, json, errorResponse, newPassword, passwordIsEmail, MSG } from '@/lib/server/http';
 import { userClient } from '@/lib/server/supabase';
 import { clientIp, take } from '@/lib/server/ratelimit';
 
@@ -25,14 +25,14 @@ export const POST = open(async (req) => {
     }
     current = { user: data.user };
   }
-  if (current.user?.email && password.trim().toLowerCase() === current.user.email.toLowerCase()) {
-    return errorResponse(400, 'VALIDATION', 'Pick something other than your email address.', 'password');
+  if (passwordIsEmail(password, current.user?.email)) {
+    return errorResponse(400, 'VALIDATION', MSG.passwordIsEmail, 'password');
   }
   const { error } = await supabase.auth.updateUser({ password });
   if (error) {
     if (/should be different/i.test(error.message)) return json({ ok: true });
     if (/weak|length|characters/i.test(error.message)) {
-      return errorResponse(400, 'VALIDATION', 'Use at least 10 characters.', 'password');
+      return errorResponse(400, 'VALIDATION', MSG.passwordTooShort, 'password');
     }
     return errorResponse(400, 'LINK_INVALID', 'This link has expired or was already used.');
   }

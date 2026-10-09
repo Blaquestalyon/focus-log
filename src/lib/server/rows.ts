@@ -69,8 +69,7 @@ export async function fetchAll<T>(
 
 /** Escape text for a PostgREST ilike value inside double quotes (`%` and `_` literal). */
 export function ilikeContains(q: string): string {
-  const escaped = q.replace(/\\/g, '\\\\').replace(/%/g, '\\%').replace(/_/g, '\\_').replace(/"/g, '\\"');
-  return `"*${escaped}*"`;
+  return `"*${ilikeExact(q).replace(/"/g, '\\"')}*"`;
 }
 
 /** Exact, case-insensitive match value for `.ilike()` (no wildcards). */

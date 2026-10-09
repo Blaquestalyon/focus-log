@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server';
 import { authed, assertId, body, json, dbFail, HttpError, MSG } from '@/lib/server/http';
 import { PROJECT_COLORS } from '@/lib/types';
 import { projectName, taskOnClock } from '@/lib/server/tasks';
-import { listProjects } from '../helpers';
+import { duplicateProjectError, listProjects } from '../helpers';
 
 type P = { id: string };
 
@@ -26,7 +26,7 @@ export const PATCH = authed<P>(async ({ req, supabase, user }, { id }) => {
   if (Object.keys(update).length) {
     const r = await supabase.from('projects').update(update).eq('id', id);
     if (r.error) {
-      if (r.error.code === '23505') throw new HttpError(409, 'DUPLICATE_NAME', `You already have a project called "${b.name}".`, 'name');
+      if (r.error.code === '23505') throw duplicateProjectError(b.name!);
       dbFail(r.error, 'projects.update');
     }
   }

@@ -23,14 +23,16 @@ async function load(ctx: { supabase: Parameters<typeof getSettingsRow>[0]; userI
 
 export const GET = authed(async ({ supabase, user }) => json(await load({ supabase, userId: user.id, email: user.email ?? '' })));
 
+const NUDGE_RANGE = 'Pick a time between 30 minutes and 12 hours.';
+
 const Patch = z.strictObject({
   time_zone: z.string().refine(isValidTimeZone, 'Pick a time zone from the list.').optional(),
   time_zone_confirmed: z.boolean().optional(),
   nudge_after_minutes: z
-    .number({ message: 'Pick a time between 30 minutes and 12 hours.' })
-    .int('Pick a time between 30 minutes and 12 hours.')
-    .min(30, 'Pick a time between 30 minutes and 12 hours.')
-    .max(720, 'Pick a time between 30 minutes and 12 hours.')
+    .number({ message: NUDGE_RANGE })
+    .int(NUDGE_RANGE)
+    .min(30, NUDGE_RANGE)
+    .max(720, NUDGE_RANGE)
     .optional(),
   nudge_email_enabled: z.boolean().optional(),
   nudge_browser_enabled: z.boolean().optional(),

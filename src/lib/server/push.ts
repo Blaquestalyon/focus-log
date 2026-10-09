@@ -2,6 +2,7 @@ import 'server-only';
 import webpush from 'web-push';
 import { env } from './env';
 import { log } from './log';
+import { storeError } from './email/postmark';
 
 export interface PushTarget { id: string; endpoint: string; p256dh: string; auth_secret: string }
 
@@ -12,6 +13,7 @@ export type PushOutcome =
 
 export const PUSH_RETRY_HUMAN = "The push service couldn't be reached. Focus Log will retry.";
 export const PUSH_RETRY_FINAL_HUMAN = "The push service couldn't be reached after 3 tries.";
+export const PUSH_NOT_CONFIGURED_HUMAN = "Pop-up alerts aren't set up yet.";
 export const PUSH_KEYS_HUMAN = "The push service rejected Focus Log's alert keys. The VAPID keys must stay the ones browsers signed up with.";
 
 export interface AlertPayload {
@@ -35,7 +37,7 @@ function host(endpoint: string): string {
 /** Send one encrypted, VAPID-signed alert (§8 "Sending an alert"). */
 export async function sendAlert(sub: PushTarget, payload: AlertPayload, ttl: number): Promise<PushOutcome> {
   if (!env.vapidConfigured) {
-    return { ok: false, gone: false, retry: false, keyRejected: false, status: 0, human: "Pop-up alerts aren't set up yet." };
+    return { ok: false, gone: false, retry: false, keyRejected: false, status: 0, human: PUSH_NOT_CONFIGURED_HUMAN };
   }
   try {
     const res = await webpush.sendNotification(
@@ -65,7 +67,7 @@ export async function sendAlert(sub: PushTarget, payload: AlertPayload, ttl: num
 }
 
 export function storePushError(status: number, human: string): string {
-  return `[${status || 'network'}] ${human}`.slice(0, 300);
+  return storeError(String(status || 'network'), human);
 }
 
 export function nudgePayload(sessionId: string, taskName: string, duration: string): AlertPayload {

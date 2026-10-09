@@ -9,11 +9,12 @@ export type SendOutcome =
 
 export const RETRY_HUMAN = "Postmark couldn't be reached. Focus Log will retry.";
 export const RETRY_FINAL_HUMAN = "Postmark couldn't be reached after 3 tries.";
+export const UNSET_HUMAN = "Email isn't set up yet.";
 
 /** POST https://api.postmarkapp.com/email with a 10-second timeout (§8). */
 export async function postmarkSend(to: string, c: EmailContent): Promise<SendOutcome> {
   const token = env.postmarkToken;
-  if (!token) return { ok: false, retry: false, keyRejected: false, code: 'unset', human: "Email isn't set up yet." };
+  if (!token) return { ok: false, retry: false, keyRejected: false, code: 'unset', human: UNSET_HUMAN };
   let res: Response;
   try {
     res = await fetch('https://api.postmarkapp.com/email', {

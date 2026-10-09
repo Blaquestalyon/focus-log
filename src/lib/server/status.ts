@@ -5,6 +5,7 @@ import { env } from './env';
 import { schedulerHealth, schedulerState } from './scheduler';
 import { sentThisMonth } from './email/send';
 import { errorCode } from './email/postmark';
+import { PUSH_NOT_CONFIGURED_HUMAN } from './push';
 import type { StatusProblem, StatusResponse } from '@/lib/types';
 import type { SettingsRow } from './settings';
 
@@ -51,7 +52,7 @@ export async function computeStatus(userId: string, settings: SettingsRow): Prom
   const problems: StatusProblem[] = [];
   if (!configured) problems.push({ key: 'email_not_configured', level: 'problem', message: "Reminder emails aren't going out — email isn't set up yet." });
   if (sh === 'stale') problems.push({ key: 'scheduler_stopped', level: 'problem', message: "Background checks have stopped, so reminders and Monday emails won't go out." });
-  if (!pushConfigured) problems.push({ key: 'push_not_configured', level: 'problem', message: "Pop-up alerts aren't set up yet." });
+  if (!pushConfigured) problems.push({ key: 'push_not_configured', level: 'problem', message: PUSH_NOT_CONFIGURED_HUMAN });
   else if (pushEnabled && browsers.length && pushKeyRejected) {
     problems.push({ key: 'push_key_rejected', level: 'problem', message: "Pop-up alerts aren't going out — the alert keys were rejected." });
   }

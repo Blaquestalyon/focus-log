@@ -20,6 +20,8 @@ export const MSG = {
   slowDown: 'Slow down a moment and try again.',
   badRequest: "That request wasn't valid.",
   tooManyAttempts: 'Too many attempts. Wait 15 minutes and try again.',
+  passwordTooShort: 'Use at least 10 characters.',
+  passwordIsEmail: 'Pick something other than your email address.',
 };
 
 export function json(data: unknown, status = 200, headers?: HeadersInit) {
@@ -60,13 +62,13 @@ function toResponse(e: unknown): Response {
 export function authed<P = Record<string, string>>(handler: Handler<P>, opts: { rateLimit?: boolean } = {}) {
   return async (req: NextRequest, context: { params: Promise<P> }) => {
     try {
-      if (req.method !== 'GET' && req.method !== 'HEAD' && !originOk(req)) {
+      const mutating = req.method !== 'GET' && req.method !== 'HEAD';
+      if (mutating && !originOk(req)) {
         return errorResponse(403, 'FORBIDDEN_ORIGIN', MSG.badRequest);
       }
       const supabase = await userClient();
       const { data, error } = await supabase.auth.getUser();
       if (error || !data.user) return errorResponse(401, 'UNAUTHENTICATED', MSG.unauthenticated);
-      const mutating = req.method !== 'GET' && req.method !== 'HEAD';
       if (mutating && opts.rateLimit !== false && !take(`mut:${data.user.id}`, 120, 60_000)) {
         return errorResponse(429, 'RATE_LIMITED', MSG.slowDown);
       }
@@ -110,7 +112,12 @@ export function assertId(id: string): void {
 }
 
 export const emailAddress = z.string().trim().min(1, 'Enter your email address.').email("That doesn't look like an email address.");
-export const newPassword = z.string().min(10, 'Use at least 10 characters.').max(72, 'Use 72 characters or fewer.');
+export const newPassword = z.string().min(10, MSG.passwordTooShort).max(72, 'Use 72 characters or fewer.');
+
+/** A new password may not be the account's own email address. */
+export function passwordIsEmail(password: string, email: string | undefined): boolean {
+  return Boolean(email) && password.trim().toLowerCase() === email!.toLowerCase();
+}
 
 /** Throw a mapped HttpError for a database error, or a 500. */
 export function dbFail(error: { code?: string; message?: string } | null, context: string): never {

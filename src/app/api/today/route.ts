@@ -1,7 +1,7 @@
 import { authed, json, dbFail } from '@/lib/server/http';
 import { getSettingsRow } from '@/lib/server/settings';
 import { VIEW_COLUMNS, toSessionRow, type ViewRow } from '@/lib/server/rows';
-import { clipSeconds, dayRange, rowEndMs, todayStr } from '@/lib/time';
+import { clipRowSeconds, dayRange, todayStr } from '@/lib/time';
 import type { TodayResponse } from '@/lib/types';
 
 export const dynamic = 'force-dynamic';
@@ -23,7 +23,7 @@ export const GET = authed(async ({ supabase, user }) => {
   if (error) dbFail(error, 'today');
   let total = 0;
   const sessions = ((data ?? []) as ViewRow[]).map((r) => {
-    const day = clipSeconds(new Date(r.started_at), new Date(rowEndMs(r, now)), start, end);
+    const day = clipRowSeconds(r, start, end, now);
     total += day;
     return toSessionRow(r, now, { day_seconds: day });
   });

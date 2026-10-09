@@ -3,7 +3,7 @@ import { adminClient } from '../supabase';
 import { env } from '../env';
 import { log } from '../log';
 import { firstOfMonth, startOfLocalDay, todayStr } from '@/lib/time';
-import { postmarkSend, storeError, RETRY_FINAL_HUMAN, type EmailContent, type SendOutcome } from './postmark';
+import { postmarkSend, storeError, RETRY_FINAL_HUMAN, UNSET_HUMAN, type EmailContent, type SendOutcome } from './postmark';
 
 export type EmailKind = 'nudge' | 'weekly_summary' | 'test' | 'password_link';
 
@@ -101,11 +101,11 @@ export async function sendLogged(p: {
       const id = await claimEmail(p.userId, p.kind, p.refKey, 'sending', p.to, p.content.subject);
       if (id) {
         await adminClient().from('email_log').update({
-          status: 'failed', error: storeError('unset', "Email isn't set up yet."), attempts: 1, next_attempt_at: null,
+          status: 'failed', error: storeError('unset', UNSET_HUMAN), attempts: 1, next_attempt_at: null,
         }).eq('id', id);
       }
       log.warn({ kind: p.kind, code: 'EMAIL_NOT_CONFIGURED' }, 'email');
-      return { rowId: id, outcome: { ok: false, retry: false, keyRejected: false, code: 'unset', human: "Email isn't set up yet." } };
+      return { rowId: id, outcome: { ok: false, retry: false, keyRejected: false, code: 'unset', human: UNSET_HUMAN } };
     }
     return { rowId: null, outcome: null };
   }
