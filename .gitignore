@@ -17,3 +17,5 @@
 /tmp/
 *.tsbuildinfo
 /supabase/.temp/
+# App icons are rendered from the brand mark by `npm run icons` (runs before every build)
+/public/icons/*.png

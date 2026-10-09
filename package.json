@@ -8,6 +8,7 @@
   },
   "scripts": {
     "dev": "next dev",
+    "prebuild": "tsx scripts/icons.ts",
     "build": "next build",
     "start": "next start -H 0.0.0.0 -p ${PORT:-3000}",
     "migrate": "supabase db push --db-url \"$SUPABASE_DB_URL\" --include-all",
