@@ -201,6 +201,13 @@ export default async function (c) {
   assert.equal(ins.rowCount, 1);
   const ins2 = await q(`insert into public.email_log(user_id,kind,ref_key,status,to_email,subject) values ($1,'weekly_summary','week:2026-09-28','sending','a','b') on conflict (user_id,kind,ref_key) where is_example = false do nothing returning id`, [U]);
   assert.equal(ins2.rowCount, 0);
+  // session_rows view respects RLS; the email claim is service-role only and once-only
+  assert.equal(+(await as(U2, `select count(*) from public.session_rows where user_id=$1`, [U])).rows[0].count, 0);
+  await err(as(null, `select * from public.session_rows`, [], 'anon'), 'permission denied');
+  await err(as(U, `select public.fl_email_log_claim($1,'test','test:x','sending','a','b')`, [U]), 'permission denied');
+  const c1 = (await as(null, `select public.fl_email_log_claim($1,'nudge','session:abc','sending','a','b') v`, [U], 'service_role')).rows[0].v;
+  const c2 = (await as(null, `select public.fl_email_log_claim($1,'nudge','session:abc','sending','a','b') v`, [U], 'service_role')).rows[0].v;
+  assert.ok(c1); assert.equal(c2, null);
   console.log('security ok');
 
   // delete all tracked data while running
