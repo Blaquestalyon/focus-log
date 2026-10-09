@@ -1,0 +1,198 @@
+/*
+ * Focus Log design tokens — blueprint §2 Design brief.
+ * Every visual value in the app comes from here. Components never use raw hex or px.
+ * The @theme block feeds Tailwind utilities (bg-surface, text-text-primary, rounded-md …);
+ * the :root block holds tokens Tailwind has no namespace for (gradients, motion, z-index …).
+ */
+
+@theme static {
+  /* Reset Tailwind's default palettes and scales so only these tokens exist. */
+  --color-*: initial;
+  --radius-*: initial;
+  --shadow-*: initial;
+  --font-*: initial;
+  --text-*: initial;
+  --ease-*: initial;
+
+  /* ---- accent ramp (anchor #D4A745) ---- */
+  --color-accent-subtle: #221B0E;
+  --color-accent-subtle-border: #4A3B1A;
+  --color-accent-hover: #E2B957;
+  --color-accent: #D4A745;
+  --color-accent-pressed: #B18A2F;
+  --color-accent-text: #E8C468;
+  --color-on-accent: #0B0B10;
+
+  /* ---- neutrals (cool, navy-tinted) ---- */
+  --color-bg-0: #07080D;
+  --color-bg-1: #0C0E16;
+  --color-surface: #121522;
+  --color-surface-raised: #191D2D;
+  --color-surface-overlay: #1E2336;
+  --color-border: #262B3F;
+  --color-border-strong: #363C56;
+  --color-rim: rgba(212, 167, 69, 0.45);
+  --color-text-primary: #F4F1E8;
+  --color-text-secondary: #B4B7C6;
+  --color-text-muted: #7F849A;
+  --color-text-disabled: #555A70;
+  --color-white: #FFFFFF;
+  --color-transparent: transparent;
+
+  /* ---- semantics ---- */
+  --color-signal: #22C3FF;
+  --color-success: #3DD68C;
+  --color-warning: #FF9F43;
+  --color-danger: #C9353F;
+  --color-danger-hover: #B12D36;
+  --color-danger-pressed: #9E2830;
+  --color-danger-text: #FF5C6C;
+  --color-info: #22C3FF;
+  --color-backdrop: rgba(7, 8, 13, 0.72);
+  --color-palette-glass: rgba(30, 35, 54, 0.88);
+
+  /* ---- project palette (dots, row edges, chart segments only) ---- */
+  --color-project-azure: #4C8DFF;
+  --color-project-violet: #9B7BFF;
+  --color-project-rose: #FF6B9A;
+  --color-project-coral: #FF8A5B;
+  --color-project-lime: #A6E05A;
+  --color-project-teal: #2ED3B7;
+  --color-project-sand: #C9B48A;
+  --color-project-slate: #8A93B8;
+
+  /* ---- type ---- */
+  --font-sans: "Archivo Variable", "Archivo", Arial, Helvetica, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  --font-weight-extrabold: 800;
+  --text-clock: clamp(64px, 11vw, 144px);
+  --text-clock--line-height: 1;
+  --text-display: 48px;
+  --text-display--line-height: 1.1;
+  --text-h1: 28px;
+  --text-h1--line-height: 1.15;
+  --text-h2: 20px;
+  --text-h2--line-height: 1.25;
+  --text-h3: 16px;
+  --text-h3--line-height: 1.25;
+  --text-body: 16px;
+  --text-body--line-height: 1.5;
+  --text-sm: 14px;
+  --text-sm--line-height: 1.45;
+  --text-meta: 13px;
+  --text-meta--line-height: 1.4;
+  --text-micro: 12px;
+  --text-micro--line-height: 1.3;
+  --text-tag: 11px;
+  --text-tag--line-height: 1.3;
+  --text-wordmark: 16px;
+  --text-wordmark--line-height: 1;
+
+  /* ---- spacing: 4px grid (p-4 = 16px, gap-8 = 32px …) ---- */
+  --spacing: 4px;
+
+  /* ---- radius ---- */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-pill: 999px;
+
+  /* ---- elevation: one shared overlay shadow ---- */
+  --shadow-overlay: 0 16px 48px rgba(0, 0, 0, 0.55);
+  --shadow-none: none;
+
+  /* ---- motion easings ---- */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in: cubic-bezier(0.7, 0, 0.84, 0);
+
+  /* ---- breakpoints ---- */
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 1024px;
+}
+
+:root {
+  color-scheme: dark;
+
+  /* spacing scale (4px grid) */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+  --space-20: 80px;
+
+  /* gradients */
+  --gradient-gold: linear-gradient(180deg, #F7E7A6 0%, #E2BC5C 42%, #B98A2C 68%, #EFD27A 100%);
+  --gradient-ribbon: linear-gradient(90deg, #0B1E6E 0%, #1546C9 45%, #22C3FF 100%);
+  /* gradient stops, for SVG fills that cannot take a CSS gradient */
+  --gold-1: #F7E7A6;
+  --gold-2: #E2BC5C;
+  --gold-3: #B98A2C;
+  --gold-4: #EFD27A;
+  --pool-gold: radial-gradient(ellipse 50% 50% at 50% 50%, rgba(212, 167, 69, 0.07) 0%, rgba(212, 167, 69, 0) 100%);
+  --halo-signal: 0 0 0 4px rgba(34, 195, 255, 0.18);
+  --halo-signal-dim: 0 0 0 4px rgba(34, 195, 255, 0.06);
+
+  /* motion durations */
+  --dur-fast: 140ms;
+  --dur-base: 200ms;
+  --dur-panel: 260ms;
+  --dur-stage: 300ms;
+  --dur-reduced: 120ms;
+  --dur-breathe: 2.4s;
+  --dur-pulse: 1.2s;
+  --dur-sparkle: 600ms;
+  --dur-count: 400ms;
+  --dur-digit: 180ms;
+  --stagger-digit: 30ms;
+
+  /* z-index */
+  --z-base: 0;
+  --z-sticky: 10;
+  --z-sidebar: 20;
+  --z-dropdown: 40;
+  --z-drawer: 50;
+  --z-dialog: 60;
+  --z-palette: 70;
+  --z-toast: 80;
+  --z-tooltip: 90;
+
+  /* fixed sizes used by layout */
+  --size-ribbon: 2px;
+  --size-hairline: 1px;
+  --size-sidebar: 240px;
+  --size-rail: 64px;
+  --size-drawer: 280px;
+  --size-topbar: 56px;
+  --size-content: 1120px;
+  --size-auth-card: 400px;
+  --size-dialog: 480px;
+  --size-dialog-wide: 560px;
+  --size-palette: 640px;
+  --size-search: 320px;
+  --size-onair: 8px;
+  --size-dot: 8px;
+  --size-swatch: 28px;
+  --size-hit: 40px;
+  --size-hit-lg: 44px;
+  --size-row: 40px;
+  --size-row-lg: 44px;
+  --size-dayrow: 36px;
+  --size-stage-min: 240px;
+  --size-stage-min-lg: 320px;
+  --size-chart: 220px;
+  --size-clock-skeleton: 360px;
+  --size-measure: 70ch;
+  --size-edge: 3px;
+  --size-focus: 2px;
+  --size-sharebar: 4px;
+  --size-indent: 24px;
+}

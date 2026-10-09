@@ -1,0 +1,21 @@
+# dependencies
+/node_modules/
+# build output (anchored to the repo root on purpose)
+/.next/
+/out/
+/coverage/
+/test-results/
+/playwright-report/
+# env
+.env
+.env.local
+.env.*.local
+# misc
+.DS_Store
+*.log
+/.pgdata/
+/tmp/
+*.tsbuildinfo
+/supabase/.temp/
+# App icons are rendered from the brand mark by `npm run icons` (runs before every build)
+/public/icons/*.png
