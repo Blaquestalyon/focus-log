@@ -311,8 +311,8 @@ export function HistoryScreen() {
                 <div role="row" className="flex h-10 items-center gap-3 pl-4 pr-1">
                   <SortHeader label="Date" active={filters.sort === 'date'} onClick={() => setFilters({ sort: 'date' })} className="w-28" />
                   <span role="columnheader" className="micro-label w-36">Time</span>
-                  <span role="columnheader" className="micro-label min-w-0 flex-1">Task</span>
-                  <span role="columnheader" className="micro-label w-44">Project</span>
+                  <span role="columnheader" className="micro-label min-w-0 flex-[2]">Task</span>
+                  <span role="columnheader" className="micro-label min-w-0 max-w-44 flex-1">Project</span>
                   <SortHeader label="Duration" active={filters.sort === 'duration'} onClick={() => setFilters({ sort: 'duration' })} className="w-20 justify-end" />
                   <span role="columnheader" className="w-10">
                     <span className="sr-only">Actions</span>
@@ -404,11 +404,11 @@ function HistoryRow({ r, tz, now, fresh }: { r: SessionRow; tz: string; now: num
       <div className="hidden h-10 items-center gap-3 pl-4 pr-1 md:flex">
         <span role="cell" className="tnum w-28 text-sm text-text-secondary">{formatDate(r.started_at, tz)}</span>
         <span role="cell" className="tnum w-36 text-sm text-text-secondary">{formatTimeRange(r.started_at, r.ended_at, tz)}</span>
-        <span role="cell" className="flex min-w-0 flex-1 items-center gap-2">
+        <span role="cell" className="flex min-w-0 flex-[2] items-center gap-2">
           <span className="truncate text-sm text-text-primary">{r.task.name}</span>
           <span className="hidden gap-1 lg:flex">{tags}</span>
         </span>
-        <span role="cell" className="flex w-44 min-w-0 items-center gap-2">
+        <span role="cell" className="flex min-w-0 max-w-44 flex-1 items-center gap-2">
           <ProjectDot color={r.project?.color ?? null} />
           <span className="truncate text-sm text-text-secondary">{r.project?.name ?? 'No project'}</span>
         </span>
