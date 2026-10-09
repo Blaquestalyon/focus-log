@@ -101,10 +101,12 @@ async function loadSettings(): Promise<Map<string, SettingsRow>> {
 interface RunningRow {
   id: string; user_id: string; started_at: string; task_name: string; project_name: string | null; nudge_acknowledged_at: string | null;
 }
+const RUNNING_COLUMNS = 'id,user_id,started_at,task_name,project_name,nudge_acknowledged_at';
+
 async function loadRunning(): Promise<RunningRow[]> {
   const { data, error } = await adminClient()
     .from('session_rows')
-    .select('id,user_id,started_at,task_name,project_name,nudge_acknowledged_at')
+    .select(RUNNING_COLUMNS)
     .is('ended_at', null);
   if (error) throw new Error(`running: ${error.code} ${error.message}`);
   return (data ?? []) as RunningRow[];
@@ -114,6 +116,22 @@ function pastThreshold(r: RunningRow, st: SettingsRow, now = Date.now()) {
   return now - Date.parse(r.started_at) >= st.nudge_after_minutes * 60_000;
 }
 
+function elapsedNow(r: RunningRow): number {
+  return Math.floor((Date.now() - Date.parse(r.started_at)) / 1000);
+}
+
+function nudgeContent(r: RunningRow, tz: string) {
+  return nudgeEmail({
+    appUrl: env.appUrl, sessionId: r.id, taskName: r.task_name, projectName: r.project_name,
+    startedAt: r.started_at, elapsedSeconds: elapsedNow(r), tz,
+  });
+}
+
+/** A claimed send is held for 10 minutes; stale recovery picks it up after that. */
+function claimLease(): string {
+  return new Date(Date.now() + 10 * 60_000).toISOString();
+}
+
 // ------------------------------------------------------------ nudge emails
 async function nudgeEmails(settings: Map<string, SettingsRow>, running: RunningRow[]) {
   for (const r of running) {
@@ -121,11 +139,7 @@ async function nudgeEmails(settings: Map<string, SettingsRow>, running: RunningR
     if (!st || !st.nudge_email_enabled || !pastThreshold(r, st)) continue;
     const to = await userEmail(r.user_id);
     if (!to) continue;
-    const elapsed = Math.floor((Date.now() - Date.parse(r.started_at)) / 1000);
-    const content = nudgeEmail({
-      appUrl: env.appUrl, sessionId: r.id, taskName: r.task_name, projectName: r.project_name,
-      startedAt: r.started_at, elapsedSeconds: elapsed, tz: st.time_zone,
-    });
+    const content = nudgeContent(r, st.time_zone);
     const acknowledged = Boolean(r.nudge_acknowledged_at);
     const id = await claimEmail(r.user_id, 'nudge', `session:${r.id}`, acknowledged ? 'skipped_acknowledged' : 'sending', to, content.subject);
     if (!id || acknowledged) continue;
@@ -151,7 +165,7 @@ async function nudgeAlerts(settings: Map<string, SettingsRow>, running: RunningR
         .from('push_subscriptions')
         .update({
           nudge_session_id: r.id, nudge_status: 'sending', nudge_attempts: 1,
-          nudge_next_attempt_at: new Date(Date.now() + 10 * 60_000).toISOString(),
+          nudge_next_attempt_at: claimLease(),
         })
         .eq('id', sub.id)
         .or(`nudge_session_id.is.null,nudge_session_id.neq.${r.id}`)
@@ -164,8 +178,7 @@ async function nudgeAlerts(settings: Map<string, SettingsRow>, running: RunningR
 
 async function deliverAlert(sub: PushTarget, r: RunningRow, attempt: number) {
   const db = adminClient();
-  const elapsed = Math.floor((Date.now() - Date.parse(r.started_at)) / 1000);
-  const out = await sendAlert(sub, nudgePayload(r.id, r.task_name, formatDuration(elapsed)), 3600);
+  const out = await sendAlert(sub, nudgePayload(r.id, r.task_name, formatDuration(elapsedNow(r))), 3600);
   const nowIso = new Date().toISOString();
   if (out.ok) {
     await db.from('push_subscriptions').update({
@@ -274,7 +287,7 @@ async function retryEmails(settings: Map<string, SettingsRow>) {
       const sessionId = row.ref_key.replace(/^session:/, '');
       const { data: r } = await db
         .from('session_rows')
-        .select('id,user_id,started_at,task_name,project_name,nudge_acknowledged_at')
+        .select(RUNNING_COLUMNS)
         .eq('id', sessionId)
         .is('ended_at', null)
         .maybeSingle();
@@ -287,7 +300,7 @@ async function retryEmails(settings: Map<string, SettingsRow>) {
     // Claim the retry so overlapping passes never send it twice.
     const { data: claimed } = await db
       .from('email_log')
-      .update({ status: 'sending', next_attempt_at: new Date(Date.now() + 10 * 60_000).toISOString() })
+      .update({ status: 'sending', next_attempt_at: claimLease() })
       .eq('id', row.id)
       .eq('status', 'failed')
       .lt('attempts', 3)
@@ -306,12 +319,7 @@ async function retryEmails(settings: Map<string, SettingsRow>) {
 }
 
 async function rebuildContent(row: EmailRow, st: SettingsRow, running: RunningRow | null) {
-  if (row.kind === 'nudge' && running) {
-    return nudgeEmail({
-      appUrl: env.appUrl, sessionId: running.id, taskName: running.task_name, projectName: running.project_name,
-      startedAt: running.started_at, elapsedSeconds: Math.floor((Date.now() - Date.parse(running.started_at)) / 1000), tz: st.time_zone,
-    });
-  }
+  if (row.kind === 'nudge' && running) return nudgeContent(running, st.time_zone);
   if (row.kind === 'weekly_summary') {
     const monday = row.ref_key.replace(/^week:/, '');
     const summary = buildWeeklySummary(await weeklyRows(row.user_id, monday, st.time_zone), monday, st.time_zone, Date.now());
@@ -341,7 +349,7 @@ async function retryAlerts(settings: Map<string, SettingsRow>) {
     if (sub.nudge_session_id && st?.nudge_browser_enabled) {
       const { data: r } = await db
         .from('session_rows')
-        .select('id,user_id,started_at,task_name,project_name,nudge_acknowledged_at')
+        .select(RUNNING_COLUMNS)
         .eq('id', sub.nudge_session_id)
         .is('ended_at', null)
         .is('nudge_acknowledged_at', null)
@@ -356,7 +364,7 @@ async function retryAlerts(settings: Map<string, SettingsRow>) {
       .from('push_subscriptions')
       .update({
         nudge_status: 'sending', nudge_attempts: sub.nudge_attempts + 1,
-        nudge_next_attempt_at: new Date(Date.now() + 10 * 60_000).toISOString(),
+        nudge_next_attempt_at: claimLease(),
       })
       .eq('id', sub.id)
       .eq('nudge_session_id', running.id)

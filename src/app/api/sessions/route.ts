@@ -1,11 +1,11 @@
 import { z } from 'zod';
 import { authed, body, json, uuid, dbFail } from '@/lib/server/http';
 import { getSettingsRow } from '@/lib/server/settings';
-import { VIEW_COLUMNS, toSessionRow, fetchAll, loadViewRow, rowEndMs, type ViewRow } from '@/lib/server/rows';
+import { VIEW_COLUMNS, toSessionRow, fetchAll, loadViewRow, type ViewRow } from '@/lib/server/rows';
 import { applyFilters, decodeCursor, encodeCursor, parseFilters } from '@/lib/server/history';
 import { assertTaskExists, resolveTaskByName } from '@/lib/server/tasks';
 import { overlapError, sessionTooLong, validateClosedRange } from '@/lib/server/overlap';
-import { localDateStr } from '@/lib/time';
+import { elapsedSeconds, localDateStr, rowEndMs } from '@/lib/time';
 import type { SessionsResponse } from '@/lib/types';
 
 export const dynamic = 'force-dynamic';
@@ -73,7 +73,7 @@ export const GET = authed(async ({ req, supabase, user }) => {
     let total = 0;
     const byDay = new Map<string, number>();
     for (const r of all) {
-      const sec = r.duration_seconds ?? Math.max(0, Math.floor((rowEndMs(r, now) - Date.parse(r.started_at)) / 1000));
+      const sec = r.duration_seconds ?? elapsedSeconds(Date.parse(r.started_at), rowEndMs(r, now));
       total += sec;
       const d = localDateStr(r.started_at, tz);
       byDay.set(d, (byDay.get(d) ?? 0) + sec);

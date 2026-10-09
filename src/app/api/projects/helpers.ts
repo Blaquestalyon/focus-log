@@ -2,6 +2,7 @@ import 'server-only';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { dbFail } from '@/lib/server/http';
 import { fetchAll } from '@/lib/server/rows';
+import { elapsedSeconds } from '@/lib/time';
 import type { ProjectColor, ProjectItem } from '@/lib/types';
 
 export async function listProjects(supabase: SupabaseClient, includeArchived: boolean, onlyId?: string): Promise<ProjectItem[]> {
@@ -30,7 +31,7 @@ export async function listProjects(supabase: SupabaseClient, includeArchived: bo
   const totals = new Map<string, number>();
   for (const s of sessions) {
     if (!s.project_id) continue;
-    const sec = s.duration_seconds ?? Math.max(0, Math.floor((now - Date.parse(s.started_at)) / 1000));
+    const sec = s.duration_seconds ?? elapsedSeconds(Date.parse(s.started_at), now);
     totals.set(s.project_id, (totals.get(s.project_id) ?? 0) + sec);
   }
   return (projects ?? []).map((p) => ({

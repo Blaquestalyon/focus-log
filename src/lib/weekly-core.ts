@@ -1,7 +1,7 @@
 /** Pure Monday-summary logic (§6 "Weekly summary"). Unit tested with fixed clocks. */
 import { TZDate } from '@date-fns/tz';
 import type { ProjectColor } from './types';
-import { addDays, clipSeconds, localDateStr, mondayOf, startOfLocalDay, weekRange, type DateStr } from './time';
+import { addDays, clipSeconds, localDateStr, mondayOf, rowEndMs, startOfLocalDay, weekRange, type DateStr } from './time';
 import { formatDuration } from './format';
 import type { ReportRow } from './report-core';
 
@@ -37,7 +37,7 @@ export function buildWeeklySummary(allRows: ReportRow[], monday: DateStr, tz: st
   const rows = allRows.filter((r) => !r.is_example);
   const { start, end } = weekRange(monday, tz);
   const prev = weekRange(addDays(monday, -7), tz);
-  const endOf = (r: ReportRow) => (r.ended_at ? new Date(r.ended_at) : new Date(nowMs));
+  const endOf = (r: ReportRow) => new Date(rowEndMs(r, nowMs));
 
   let total = 0;
   let previous = 0;

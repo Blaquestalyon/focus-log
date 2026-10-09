@@ -81,19 +81,20 @@ export function formatDate(instant: Date | number | string, tz: string, now: Dat
 }
 
 export function formatDateStr(s: DateStr, tz: string, now: Date | number = Date.now()): string {
-  const { y, m, d } = parseDateStr(s);
-  const dt = new Date(Date.UTC(y, m - 1, d, 12));
-  const sameYear = y === Number(localDateStr(now, tz).slice(0, 4));
-  const base = `${WD_SHORT[dt.getUTCDay()]}, ${MON_SHORT[m - 1]} ${d}`;
-  return sameYear ? base : `${base}, ${y}`;
+  return dayLabel(s, tz, now, WD_SHORT, MON_SHORT);
 }
 
 /** Day header: `Wednesday, October 8` (+`, 2025` in other years). */
 export function formatDayLong(s: DateStr, tz: string, now: Date | number = Date.now()): string {
+  return dayLabel(s, tz, now, WD_LONG, MON_LONG);
+}
+
+/** `<weekday>, <month> <day>`, with the year only when it isn't the current one in `tz`. */
+function dayLabel(s: DateStr, tz: string, now: Date | number, weekdays: string[], months: string[]): string {
   const { y, m, d } = parseDateStr(s);
   const dt = new Date(Date.UTC(y, m - 1, d, 12));
   const sameYear = y === Number(localDateStr(now, tz).slice(0, 4));
-  const base = `${WD_LONG[dt.getUTCDay()]}, ${MON_LONG[m - 1]} ${d}`;
+  const base = `${weekdays[dt.getUTCDay()]}, ${months[m - 1]} ${d}`;
   return sameYear ? base : `${base}, ${y}`;
 }
 

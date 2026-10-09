@@ -92,11 +92,19 @@ export function monthRange(first: DateStr, tz: string): Range {
   return { start: startOfLocalDay(first, tz), end: startOfLocalDay(addMonths(first, 1), tz) };
 }
 
+/** Whole seconds from `startMs` to `endMs`, never negative. */
+export function elapsedSeconds(startMs: number, endMs: number): number {
+  return Math.max(0, Math.floor((endMs - startMs) / 1000));
+}
+
+/** When a session row ends: its `ended_at`, or `nowMs` while it is still running. */
+export function rowEndMs(r: { ended_at: string | null }, nowMs: number): number {
+  return r.ended_at ? Date.parse(r.ended_at) : nowMs;
+}
+
 /** Seconds of [start, end) that fall inside [pStart, pEnd). */
 export function clipSeconds(start: Date, end: Date, pStart: Date, pEnd: Date): number {
-  const s = Math.max(start.getTime(), pStart.getTime());
-  const e = Math.min(end.getTime(), pEnd.getTime());
-  return Math.max(0, Math.floor((e - s) / 1000));
+  return elapsedSeconds(Math.max(start.getTime(), pStart.getTime()), Math.min(end.getTime(), pEnd.getTime()));
 }
 
 export function todayStr(tz: string, now: Date | number = Date.now()): DateStr {

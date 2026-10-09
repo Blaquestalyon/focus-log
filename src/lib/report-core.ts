@@ -5,7 +5,7 @@
  */
 import type { ProjectColor, ReportResponse } from './types';
 import {
-  addDays, addMonths, clipSeconds, daysInMonth, firstOfMonth, mondayOf, monthRange, todayStr, weekRange,
+  addDays, addMonths, clipSeconds, daysInMonth, firstOfMonth, mondayOf, monthRange, rowEndMs, todayStr, weekRange,
   startOfLocalDay, type DateStr,
 } from './time';
 import { formatMonth, formatWeekRange } from './format';
@@ -51,8 +51,7 @@ export function validatePeriodStart(period: Period, start: string | null, tz: st
 function sumClipped(rows: ReportRow[], s: Date, e: Date, nowMs: number): number {
   let t = 0;
   for (const r of rows) {
-    const end = r.ended_at ? new Date(r.ended_at) : new Date(nowMs);
-    t += clipSeconds(new Date(r.started_at), end, s, e);
+    t += clipSeconds(new Date(r.started_at), new Date(rowEndMs(r, nowMs)), s, e);
   }
   return t;
 }
@@ -76,8 +75,7 @@ export function computeReport(
     const byProject = new Map<string | null, number>();
     let dayTotal = 0;
     for (const r of rows) {
-      const end = r.ended_at ? new Date(r.ended_at) : new Date(nowMs);
-      const sec = clipSeconds(new Date(r.started_at), end, s, e);
+      const sec = clipSeconds(new Date(r.started_at), new Date(rowEndMs(r, nowMs)), s, e);
       if (!sec) continue;
       dayTotal += sec;
       byProject.set(r.project_id, (byProject.get(r.project_id) ?? 0) + sec);
@@ -91,8 +89,7 @@ export function computeReport(
 
   const projects = new Map<string, ReportResponse['projects'][number] & { taskMap: Map<string, { id: string; name: string; seconds: number }> }>();
   for (const r of rows) {
-    const end = r.ended_at ? new Date(r.ended_at) : new Date(nowMs);
-    const sec = clipSeconds(new Date(r.started_at), end, range.start, range.end);
+    const sec = clipSeconds(new Date(r.started_at), new Date(rowEndMs(r, nowMs)), range.start, range.end);
     if (!sec) continue;
     const key = r.project_id ?? '__none__';
     let p = projects.get(key);

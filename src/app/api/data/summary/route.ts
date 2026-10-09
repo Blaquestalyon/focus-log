@@ -1,5 +1,6 @@
 import { authed, json, dbFail } from '@/lib/server/http';
 import { fetchAll } from '@/lib/server/rows';
+import { elapsedSeconds } from '@/lib/time';
 import type { DataSummary } from '@/lib/types';
 
 export const dynamic = 'force-dynamic';
@@ -20,7 +21,7 @@ export const GET = authed(async ({ supabase }) => {
     'data.totals',
   );
   const now = Date.now();
-  const seconds = all.reduce((s, r) => s + (r.duration_seconds ?? Math.max(0, Math.floor((now - Date.parse(r.started_at)) / 1000))), 0);
+  const seconds = all.reduce((s, r) => s + (r.duration_seconds ?? elapsedSeconds(Date.parse(r.started_at), now)), 0);
   const res: DataSummary = {
     example_counts: { projects, tasks, sessions, emails },
     kept: { projects: (kp.data ?? []) as { id: string; name: string }[], tasks: (kt.data ?? []) as { id: string; name: string }[] },

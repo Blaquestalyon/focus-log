@@ -2,6 +2,7 @@ import 'server-only';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { ProjectColor, SessionRow } from '@/lib/types';
 import { dbFail } from './http';
+import { elapsedSeconds } from '@/lib/time';
 
 /** A row of the public.session_rows view. */
 export interface ViewRow {
@@ -29,7 +30,7 @@ export const VIEW_COLUMNS =
   'id,user_id,task_id,started_at,ended_at,duration_seconds,source,run_id,end_reason,edited_at,nudge_acknowledged_at,is_example,task_name,task_archived_at,project_id,project_name,project_color,project_archived_at';
 
 export function toSessionRow(r: ViewRow, nowMs: number, extra: Partial<SessionRow> = {}): SessionRow {
-  const live = r.ended_at ? null : Math.max(0, Math.floor((nowMs - Date.parse(r.started_at)) / 1000));
+  const live = r.ended_at ? null : elapsedSeconds(Date.parse(r.started_at), nowMs);
   return {
     id: r.id,
     task: { id: r.task_id, name: r.task_name, archived: Boolean(r.task_archived_at) },
@@ -46,11 +47,6 @@ export function toSessionRow(r: ViewRow, nowMs: number, extra: Partial<SessionRo
     is_example: r.is_example,
     ...extra,
   };
-}
-
-/** Seconds a row covers up to `nowMs` (running rows count up to now). */
-export function rowEndMs(r: { ended_at: string | null }, nowMs: number): number {
-  return r.ended_at ? Date.parse(r.ended_at) : nowMs;
 }
 
 /** Page through a query 1000 rows at a time (PostgREST caps a response). */
