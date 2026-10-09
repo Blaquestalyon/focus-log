@@ -163,9 +163,15 @@ export const TaskCombobox = forwardRef<TaskComboboxHandle, TaskComboboxProps>(fu
             setActive((i) => (options.length ? (i <= 0 ? options.length - 1 : i - 1) : -1));
           } else if (e.key === 'Enter') {
             e.preventDefault();
+            // Committing closes the list so the clock is visible as it starts; it reopens on typing or click.
             if (showList && active >= 0 && options[active]) choose(options[active]);
-            else if (p.selected && p.selected.name === p.text) p.onCommit({ task: p.selected });
-            else if (q) p.onCommit({ text: q });
+            else if (p.selected && p.selected.name === p.text) {
+              setOpen(false);
+              p.onCommit({ task: p.selected });
+            } else if (q) {
+              setOpen(false);
+              p.onCommit({ text: q });
+            }
           } else if (e.key === 'Escape') {
             if (showList) {
               e.preventDefault();

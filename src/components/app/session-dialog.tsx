@@ -1,6 +1,6 @@
 'use client';
 /** Add time / Edit session (§4 History "Session dialog", F10, F11). 560px wide. */
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { CircleAlert } from 'lucide-react';
 import { toast } from '@/lib/client/toast';
 import { Button } from '@/components/ui/button';
@@ -41,10 +41,13 @@ export function SessionDialog() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [banner, setBanner] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  // Set once the owner edits the date or a time, so the late-arriving default never overwrites them.
+  const timesTouched = useRef(false);
 
   // Defaults.
   useEffect(() => {
     if (!st) return;
+    timesTouched.current = false;
     setErrors({});
     setBanner(null);
     setHighlight(null);
@@ -91,7 +94,7 @@ export function SessionDialog() {
       try {
         const r = await api<SessionsResponse>(`/api/sessions?range=custom&from=${d}&to=${d}&sort=date&limit=50`);
         const ends = r.rows.filter((x) => x.ended_at).map((x) => Date.parse(x.ended_at!));
-        if (ends.length) applyStart(Math.max(...ends));
+        if (ends.length && !timesTouched.current) applyStart(Math.max(...ends));
       } catch {
         /* keep 9:00 AM */
       }
@@ -109,6 +112,7 @@ export function SessionDialog() {
 
   // An end time earlier than the start ticks "Ends on a different day" and sets the next day.
   const onEndChange = (v: string) => {
+    timesTouched.current = true;
     setEnd(v);
     if (!multi && v && start && v < start) {
       setMulti(true);
@@ -250,11 +254,17 @@ export function SessionDialog() {
             </Field>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
               <Field label="Date" error={null}>
-                {({ id }) => <Input id={id} type="date" value={date} onChange={(e) => setDate(e.target.value)} />}
+                {({ id }) => <Input id={id} type="date" value={date} onChange={(e) => {
+                  timesTouched.current = true;
+                  setDate(e.target.value);
+                }} />}
               </Field>
               <Field label="Start time" error={errors.started_at} id="sd-started_at">
                 {({ id, describedBy, invalid }) => (
-                  <Input id={id} type="time" step={60} value={start} onChange={(e) => setStart(e.target.value)} invalid={invalid} aria-describedby={describedBy} />
+                  <Input id={id} type="time" step={60} value={start} onChange={(e) => {
+                    timesTouched.current = true;
+                    setStart(e.target.value);
+                  }} invalid={invalid} aria-describedby={describedBy} />
                 )}
               </Field>
               <Field label="End time" error={errors.ended_at} id="sd-ended_at">
