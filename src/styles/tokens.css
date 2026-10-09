@@ -64,6 +64,11 @@
   /* ---- type ---- */
   --font-sans: "Archivo Variable", "Archivo", Arial, Helvetica, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  --font-weight-extrabold: 800;
   --text-clock: clamp(64px, 11vw, 144px);
   --text-clock--line-height: 1;
   --text-display: 48px;
@@ -127,6 +132,11 @@
   /* gradients */
   --gradient-gold: linear-gradient(180deg, #F7E7A6 0%, #E2BC5C 42%, #B98A2C 68%, #EFD27A 100%);
   --gradient-ribbon: linear-gradient(90deg, #0B1E6E 0%, #1546C9 45%, #22C3FF 100%);
+  /* gradient stops, for SVG fills that cannot take a CSS gradient */
+  --gold-1: #F7E7A6;
+  --gold-2: #E2BC5C;
+  --gold-3: #B98A2C;
+  --gold-4: #EFD27A;
   --pool-gold: radial-gradient(ellipse 50% 50% at 50% 50%, rgba(212, 167, 69, 0.07) 0%, rgba(212, 167, 69, 0) 100%);
   --halo-signal: 0 0 0 4px rgba(34, 195, 255, 0.18);
   --halo-signal-dim: 0 0 0 4px rgba(34, 195, 255, 0.06);
