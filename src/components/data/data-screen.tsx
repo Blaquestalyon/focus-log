@@ -151,10 +151,10 @@ function LoadError({ onRetry }: { onRetry: () => void }) {
 }
 
 function HeaderCell({ children, className, sort, onSort }: { children: React.ReactNode; className?: string; sort?: 'asc' | 'desc' | 'none'; onSort?: () => void }) {
-  if (!onSort) return <span role="columnheader" className={cn('micro-label', className)}>{children}</span>;
+  if (!onSort) return <span role="columnheader" className={cn('micro-label whitespace-nowrap', className)}>{children}</span>;
   return (
     <span role="columnheader" aria-sort={sort === 'asc' ? 'ascending' : sort === 'desc' ? 'descending' : 'none'} className={cn('flex', className)}>
-      <button type="button" onClick={onSort} className={cn('micro-label -mx-1 inline-flex h-8 items-center gap-1 rounded-sm px-1 hover:text-text-secondary', sort !== 'none' && 'text-text-secondary')}>
+      <button type="button" onClick={onSort} className={cn('micro-label -mx-1 inline-flex h-8 items-center gap-1 whitespace-nowrap rounded-sm px-1 hover:text-text-secondary', sort !== 'none' && 'text-text-secondary')}>
         {children}
         <ChevronDown className={cn('size-3 transition-fast', sort === 'none' ? 'opacity-0' : 'opacity-100', sort === 'asc' && 'rotate-180')} aria-hidden />
       </button>
