@@ -11,7 +11,7 @@
     "prebuild": "tsx scripts/icons.ts",
     "build": "next build",
     "start": "next start -H 0.0.0.0 -p ${PORT:-3000}",
-    "migrate": "supabase db push --db-url \"$SUPABASE_DB_URL\" --include-all",
+    "migrate": "node scripts/migrate.mjs",
     "seed": "tsx scripts/seed.ts",
     "icons": "tsx scripts/icons.ts",
     "lint": "node scripts/lint-tokens.mjs && tsc --noEmit",

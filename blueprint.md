@@ -1754,6 +1754,7 @@ VibeStack Builder builds Focus Log on GitHub (code), Railway (hosting) and Supab
    - The service settings below live in `railway.json` at the repo root (config as code), so every deploy uses them.
    - Build: `npm ci` (the lockfile is committed) then `npm run build`. Start command `npm run start` (`next start -H 0.0.0.0 -p $PORT`).
    - **Pre-deploy command `npm run migrate`**, which runs `supabase db push --db-url "$SUPABASE_DB_URL"`. This is how every release after launch applies its database changes.
+     - `npm run migrate` runs `scripts/migrate.mjs`. When `SUPABASE_DB_URL` is not set on the host, it logs that this deploy ran no migrations and exits 0, and database changes are applied through the platform's migration tool instead. With it set, any migration error exits non-zero and fails the deploy.
      - It uses the Supabase CLI, from the `supabase` npm package, which is listed in `dependencies` so it is present when the deploy runs.
      - Railway runs this command after the build and before the new deployment starts, with the service's variables. Migrations can't run during the build, because the build has no database connection.
      - A migration that is already applied is skipped, so the command is safe to run on every deploy.
@@ -1786,7 +1787,7 @@ VibeStack Builder builds Focus Log on GitHub (code), Railway (hosting) and Supab
 | `SUPABASE_URL` | Supabase project URL |
 | `SUPABASE_ANON_KEY` | Public anon key for user-scoped, RLS-enforced requests (server-side only) |
 | `SUPABASE_SERVICE_ROLE_KEY` | Service-role key for the scheduler, `email_log` writes, `push_subscriptions` delivery writes, password-link generation, the seed and the data-removal function. Never sent to the browser |
-| `SUPABASE_DB_URL` | Postgres connection string for the Supabase database, used only by the pre-deploy migration command (`npm run migrate`), never by the running app. Use the session-pooler connection string (port 5432) from Supabase → Connect, because Supabase's direct database address is IPv6-only. Percent-encode any special characters in the database password. Never sent to the browser |
+| `SUPABASE_DB_URL` | Optional. Postgres connection string for the Supabase database, used only by the pre-deploy migration command (`npm run migrate`), never by the running app. Without it, deploys skip migrations (see step 3). Use the session-pooler connection string (port 5432) from Supabase → Connect, because Supabase's direct database address is IPv6-only. Percent-encode any special characters in the database password. Never sent to the browser |
 | `POSTMARK_SERVER_TOKEN` | Postmark Server API token (supplied by the owner) |
 | `EMAIL_FROM` | From address, default `Focus Log <jdavis@power-in-numbers.net>` |
 | `OWNER_EMAIL` | `jdavis@power-in-numbers.net`, used by the seed script |
