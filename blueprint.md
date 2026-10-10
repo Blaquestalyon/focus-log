@@ -16,7 +16,7 @@ Focus Log is a personal work timer for one person, its owner. It is a **website*
   - the Sign in screen;
   - the Set password screen, and only with a valid emailed link;
   - the "request a set-password link" form;
-  - `GET /api/health`;
+  - `GET /api/health`, and `GET /health` (a bare liveness answer, `{"ok":true}`, for the hosting platform);
   - the static files a browser needs before anyone signs in: the service worker `/sw.js`, the app manifest `/manifest.webmanifest` and the app icons under `/icons/`.
 
   Every other page redirects to `/sign-in?next=<original path>`, and every other API route answers `401`. There is **no sign-up**. The app has no sign-up screen, and new sign-ups are disabled in Supabase Auth.
@@ -1143,7 +1143,7 @@ The clock never counts ticks. On wake or `visibilitychange` → visible, the cli
 
 ## 6. Business logic & validation
 
-**Permissions.** There is one role, Owner, which can do everything listed in §1 on its own rows only. RLS enforces this in the database, and each API route also requires a valid session. The scheduler uses the service role for reads, for `email_log` writes, and for the delivery fields of `push_subscriptions` (deleting rows whose push service reports them gone) only. Signed-out visitors reach only `/sign-in`, `/set-password`, `POST /api/auth/*`, `GET /api/health`, and the static files `/sw.js`, `/manifest.webmanifest` and `/icons/*`.
+**Permissions.** There is one role, Owner, which can do everything listed in §1 on its own rows only. RLS enforces this in the database, and each API route also requires a valid session. The scheduler uses the service role for reads, for `email_log` writes, and for the delivery fields of `push_subscriptions` (deleting rows whose push service reports them gone) only. Signed-out visitors reach only `/sign-in`, `/set-password`, `POST /api/auth/*`, `GET /api/health`, `GET /health`, and the static files `/sw.js`, `/manifest.webmanifest` and `/icons/*`.
 
 **Timer states and transitions** (all inside the §3 database functions, with `now()` from the database):
 
@@ -1376,7 +1376,7 @@ After any timer error the client refetches `GET /api/timer`. `FL_STOP_TOO_LONG` 
 
 **Conventions**
 - **Format:** JSON in and out (UTF-8). Timestamps are ISO 8601 UTC, and dates are `YYYY-MM-DD` local to the owner.
-- **Auth:** Supabase session cookies, refreshed by middleware. Every route except `/api/health` and `/api/auth/*` requires a signed-in owner and answers `401 { "error": { "code": "UNAUTHENTICATED", "message": "Sign in to continue." } }` otherwise.
+- **Auth:** Supabase session cookies, refreshed by middleware. Every route except `/api/health`, `/health` and `/api/auth/*` requires a signed-in owner and answers `401 { "error": { "code": "UNAUTHENTICATED", "message": "Sign in to continue." } }` otherwise.
 - **Static files:** `/sw.js`, `/manifest.webmanifest` and `/icons/*` are served without sign-in (the middleware skips them) and are not API routes. `/sw.js` is sent with `Cache-Control: no-cache`.
 - **Same-origin check:** non-GET routes reject an `Origin` that isn't `APP_URL` with `403 FORBIDDEN_ORIGIN`.
 - **Errors:** `{ "error": { "code": "<CODE>", "message": "<human copy from §6>", "field": "<optional field name>" } }`. Common codes:
@@ -1474,6 +1474,7 @@ After any timer error the client refetches `GET /api/timer`. `FL_STOP_TOO_LONG` 
 | `POST /api/data/remove-examples` | — | 200 `{removed: {projects, tasks, sessions, emails}, kept: {projects: [{id, name}], tasks: [{id, name}]}}` | 409 `EXAMPLES_IN_USE` ("Some example items are still in use, so nothing was removed. Stop the timer, then try again.") |
 | `POST /api/data/delete-all` | `{confirm:"DELETE"}` | 200 `{deleted: {…}}` | 400 `VALIDATION` ("Type DELETE to confirm.") |
 | `GET /api/status` | — | 200 `{email: {configured, key_rejected, last_sent_at, failed_7d, sent_this_month, monthly_cap}, scheduler: {enabled, last_tick_at, healthy, last_error}, push: {configured, enabled, key_rejected, browsers, failing_browsers: [label], last_sent_at}, problems: [{key, level: "warning"\|"problem", message}], version}`. Email figures exclude example rows | — |
+| `GET /health` | none (public) | 200 `{ok:true}` whenever the process is answering (the hosting platform's liveness check; Railway's deploy health check still uses `/api/health`) | Never exposes anything else |
 | `GET /api/health` | none (public) | 200 `{status:"ok", db:"ok", scheduler:"ok"\|"starting"\|"off", time}`; 503 `{status:"degraded", db:"ok"\|"error", scheduler:"ok"\|"starting"\|"off"\|"stale", time}` when a 3-second DB probe fails, or when the scheduler is enabled, the process has been up more than 3 minutes, and the last tick is older than 3 minutes. `starting` (up under 3 minutes with no tick yet) counts as healthy, so deploy health checks pass | Never exposes keys, emails or counts |
 
 ## 8. Integrations & extras

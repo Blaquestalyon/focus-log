@@ -3,7 +3,7 @@ import { createServerClient } from '@supabase/ssr';
 
 /**
  * Session refresh + access rules (§1 Roles, §7 Auth).
- * Public: /sign-in, /set-password, /api/auth/*, /api/health and the static files a browser
+ * Public: /sign-in, /set-password, /api/auth/*, /api/health, /health and the static files a browser
  * needs before signing in (/sw.js, /manifest.webmanifest, /icons/*). Every other page
  * redirects to /sign-in?next=…, every other API route answers 401.
  */
@@ -11,7 +11,7 @@ const PUBLIC_PAGES = ['/sign-in', '/set-password'];
 
 export async function middleware(req: NextRequest) {
   const { pathname, search } = req.nextUrl;
-  if (pathname === '/api/health') return NextResponse.next();
+  if (pathname === '/api/health' || pathname === '/health') return NextResponse.next();
 
   let res = NextResponse.next({ request: req });
   const url = process.env.SUPABASE_URL;
