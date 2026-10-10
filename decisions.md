@@ -95,3 +95,19 @@ Same behavior, same look, same checks. Dependencies unchanged (installed from th
   *Why:* at tablet width (768–1023px) the fixed columns left the task name about 40px; the table itself must stay a table from 768px (§4).
 - **Turning off sign-ups is the owner's step in the Supabase dashboard** (T-A7).
   *Why:* it is a Supabase Auth project setting, not SQL, and none of the build tools can change it. The owner was asked to do it during this fix round; until confirmed, it stays on the wiring checklist.
+
+## 2026-10-09 — Deploy (reconciled before going live)
+
+**Adopted into the blueprint** (each already worked as built; the plan now says what ships):
+- `TimerView.unarchived`, `GET /api/sessions/:id`, sliding-window rate limits, the Close (X) button and focus return, secondary text on overlay surfaces, the popover-in-dialog layer, and the copy listed under "Build" that the plan did not pin (project/task delete and save toasts, duplicate-task message, Tasks "No tasks match." state, the danger-zone description line). Edited in §2, §4, §6, §7 and §10.
+- **`APP_URL` falls back to Railway's `RAILWAY_PUBLIC_DOMAIN`** (`https://` + domain) when unset.
+  *Why:* the public address is generated during provisioning, after the variables are chosen, and the app refuses to start without an address (same-origin check, email links). Using Railway's own variable removes a hand-copied value that could drift. `APP_URL` still wins when set (for example after a move to a custom domain, which also needs the Supabase Site URL and every browser's alert sign-up redone, §8).
+- **Railway settings are in `railway.json`** (Railpack build: `npm ci` from the lockfile, then `npm run build`; start `npm run start`; pre-deploy `npm run migrate`; health check `/api/health`, 300s; restart on failure; one replica; no sleeping).
+  *Why:* §10's pre-deploy migration and "app sleeping off" are service settings the provisioning tool does not take; config as code applies them on every deploy.
+- **The first pre-deploy `npm run migrate` re-applies both migrations once.**
+  *Why:* the live database was built through the platform's migration tool, so it has no Supabase migration-history table (checked 2026-10-09: the view, the claim function and every column are present; no history). Both migrations are re-runnable; locally, `supabase db push --include-all` against a copy with the history removed applied both, kept all rows and recorded them, and a second run reported "up to date".
+
+**Known issues shipping now**
+- **Sign-ups are still allowed on the Supabase project (T-A7)** until the owner turns off "Allow new users to sign up" in the Supabase dashboard. It is a Supabase Auth project setting that none of the build tools can change. The owner was asked twice during the fix round with no answer yet; it is first on the wiring checklist, together with minimum password length 10, OTP expiry 3600s and the Site URL. Until then, anyone who knew the project's address could create a login; the app's data stays private to each login (row-level security), but a stranger's account could use the app and its scheduler emails.
+- **Fix-round changes not yet re-tested by QA:** the fifteen QA fixes (pushes 3d437a6 → fe09dcb) passed the testers' own scripts against the local stand-in, but no QA round ran on that snapshot before deploy.
+- **Hydration warning #418** seen once in the first production click-through (see PROGRESS "Watch in QA"); not reproduced since.

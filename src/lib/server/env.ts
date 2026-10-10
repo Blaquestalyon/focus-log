@@ -5,12 +5,23 @@
  */
 export const REQUIRED_ENV = ['APP_URL', 'SUPABASE_URL', 'SUPABASE_ANON_KEY', 'SUPABASE_SERVICE_ROLE_KEY'] as const;
 
+/**
+ * APP_URL may be left unset on Railway: the public domain Railway generates for the service
+ * (RAILWAY_PUBLIC_DOMAIN) is used instead, so the address never has to be typed in by hand.
+ */
+function appUrlValue(): string | undefined {
+  const explicit = process.env.APP_URL?.trim();
+  if (explicit) return explicit;
+  const domain = process.env.RAILWAY_PUBLIC_DOMAIN?.trim();
+  return domain ? `https://${domain}` : undefined;
+}
+
 export function missingEnv(): string[] {
-  return REQUIRED_ENV.filter((k) => !process.env[k] || !String(process.env[k]).trim());
+  return REQUIRED_ENV.filter((k) => !(k === 'APP_URL' ? appUrlValue() : process.env[k]?.trim()));
 }
 
 function req(name: (typeof REQUIRED_ENV)[number]): string {
-  const v = process.env[name];
+  const v = name === 'APP_URL' ? appUrlValue() : process.env[name];
   if (!v) throw new Error(`Missing environment variable ${name}`);
   return v.trim();
 }

@@ -161,7 +161,7 @@ Project palette (key → hex; each is ≥3:1 on `--color-surface`): `azure #4C8D
 | Body | Archivo `wdth 100`, `wght 400` | 16px / 1.5, measure ≤70ch |
 | Body small / table | Archivo `wdth 100`, `wght 400`, tnum in numeric cells | 14px / 1.45 |
 | Meta | Archivo `wght 400`, `--color-text-secondary` | 13px / 1.4 |
-| Micro-label | JetBrains Mono 500, uppercase, tracking 0.08em, `--color-text-muted` | 12px / 1.3 |
+| Micro-label | JetBrains Mono 500, uppercase, tracking 0.08em, `--color-text-muted` (`--color-text-secondary` on overlay surfaces such as dialogs and the palette, where muted text would fall below AA) | 12px / 1.3 |
 | Kbd chip | JetBrains Mono 400, 1px `--color-border-strong`, radius 4px, padding 2px 6px | 12px / 1 |
 
 **DENSITY:** comfortable on the Timer stage; compact on History and Reports (40px rows); regular everywhere else.
@@ -188,7 +188,7 @@ Project palette (key → hex; each is ≥3:1 on `--color-surface`): `azure #4C8D
 - **Entrances:** dialogs and the palette enter with opacity 0→1 plus scale 0.98→1. Menus enter with opacity plus a 4px downward translate, and toasts with opacity plus an 8px upward translate.
 - **Reduced motion** (`prefers-reduced-motion: reduce`): every translate, scale and stagger collapses to a 120ms opacity fade. The digit stagger and the logged sparkle are skipped, and the light pool appears and disappears with a 120ms fade.
 
-**Z-index tokens:** base 0, sticky 10, sidebar 20, dropdown 40, drawer 50, dialog 60, palette 70, toast 80, tooltip 90.
+**Z-index tokens:** base 0, sticky 10, sidebar 20, dropdown 40, drawer 50, dialog 60, palette 70, toast 80, tooltip 90. A popover or select opened from inside a dialog uses the layer just above the dialog (`--z-dialog` + 1), so it is never hidden behind the dialog's backdrop.
 
 **SIGNATURE MOMENTS**
 1. **The Stage** (Timer screen hero, signed-in `/`). The upper part of the Timer screen is a void framed by the badge rim: 1px `--color-rim`, 8px radius. Its min-height is 320px at ≥1024px and 240px below that. It holds only the task name (h2), the clock, the flanking micro-labels, the gold hairline and the controls, set over a still starfield.
@@ -550,6 +550,8 @@ Focus Log has seven screens. Two are for signed-out visitors (Sign in, Set passw
   - Menus are Radix DropdownMenu with 8px radius, the overlay shadow, 36px items, arrow-key navigation, Enter to select and Esc to close.
   - Destructive items use `--color-danger-text` with a `Trash2` icon and sit last, below a separator.
 - **Dialogs:** Radix Dialog, max width 480px (560px for the session dialogs), 8px radius, `--color-surface-overlay` background, overlay shadow, and a backdrop of `rgba(7,8,13,0.72)`.
+  - A Close icon button (`X`, tooltip "Close") sits in the top-right corner and is last in the tab order, so opening a dialog focuses its first field (or Cancel); a dialog with nothing to fill in focuses itself. A dialog opened from a ⋯ menu returns focus to that ⋯ button when it closes.
+  - Text inside dialogs and the palette that would be muted elsewhere uses `--color-text-secondary` (the overlay surface is lighter than `--color-surface-raised`), and links inside running text are underlined.
   - Focus is trapped inside. Esc and Cancel close the dialog, and focus returns to the trigger.
   - The footer has buttons right-aligned, with Cancel (ghost) to the left of the confirm button.
 - **Confirm dialogs for deletes:** the title names the thing being deleted, and the confirm button is a danger button whose label repeats the verb.
@@ -882,7 +884,8 @@ Focus Log has seven screens. Two are for signed-out visitors (Sign in, Set passw
   - **Name:** maximum 60 characters.
   - **Colour:** an 8-swatch radio group. Each swatch is a 28px circle with a 40px hit area and an accessible name ("Azure", "Violet", "Rose", "Coral", "Lime", "Teal", "Sand", "Slate"). The selected swatch has a 2px `--color-text-primary` ring at 2px offset. Arrow keys move the selection.
   - **Buttons:** **Cancel**, then **Create project** or **Save changes**.
-- **Delete confirm:** **"Delete Show It Off?"** / "Its 2 saved tasks will be deleted too. It has no logged time." with **Cancel** and **Delete project**.
+- **Delete confirm:** **"Delete Show It Off?"** / "Its 2 saved tasks will be deleted too. It has no logged time." (with no saved tasks: "It has no logged time, so nothing else changes.") with **Cancel** and **Delete project**. Success toast: "Deleted Show It Off."
+- **Edit saved:** toast "Project updated."
   - Blocked (409 `ON_CLOCK`, a task of this project is running or paused): the dialog closes and an error toast reads "Stop the timer first — Invoice prep in this project is on the clock." Nothing is deleted.
 - **Empty:** the stroke sparkle mark, **"No projects yet."** / "Projects and clients keep your hours sorted. Add your first one." and **New project**.
 
@@ -894,8 +897,11 @@ Focus Log has seven screens. Two are for signed-out visitors (Sign in, Set passw
 - **Task dialog:**
   - **Fields:** Name (maximum 80 characters) and Project (select, including "No project" and **New project…**).
   - **Moving a task with sessions:** when the project changes on a task that has sessions, an inline warning appears: "Moving this task also moves its 14 sessions (12h 30m) to Client: Acme Co. Past reports will change to match."
-- **Delete confirm:** **"Delete Invoice prep?"** / "It has no logged time, so nothing else changes." with **Delete task**.
+- **Delete confirm:** **"Delete Invoice prep?"** / "It has no logged time, so nothing else changes." with **Delete task**. Success toast: "Deleted Invoice prep."
+- **Create / edit saved:** toasts "Created Invoice prep." and "Task updated."
+- **Duplicate name:** "You already have a task called "Invoice prep" in Sample: Admin & Billing." (with no project: "You already have a task called "Invoice prep" with no project.")
 - **Empty:** **"No saved tasks yet."** / "Tasks are saved the first time you start a timer on them." and **Go to Timer**.
+- **No matches** (search or project filter finds nothing): **"No tasks match."** / "Try a different word or project."
 
 **Sent emails tab:**
 - **Table columns:** Date (`Mon, Oct 6, 8:00 AM`) | Type (`Reminder`, `Weekly summary`, `Test`, `Password link`) | Subject | Status | Detail. Newest first, 50 per page with **Show 50 more**.
@@ -960,7 +966,7 @@ Focus Log has seven screens. Two are for signed-out visitors (Sign in, Set passw
    - **Emails this month.** `12 of 90`. Warning at 80% or more of the cap.
    - **Version.** The 7-character commit id.
 6. **Danger zone** (1px `--color-danger` at 40% opacity border)
-   - **"Delete all tracked data"**: the danger button **Delete all tracked data…**.
+   - **"Delete all tracked data"** (h3) with the line "Projects, tasks, sessions and email records. Your login, settings and allowed browsers stay.", and the danger button **Delete all tracked data…**.
    - **Confirm dialog:**
      - Title **"Delete all tracked data?"**
      - Body: "This permanently deletes every project, task, session and email record — 312 sessions, 182h 40m. Your login, settings and allowed browsers stay. Download a copy of your hours first if you might want them: it's a spreadsheet you can read, and Focus Log can't load it back in."
@@ -1296,7 +1302,7 @@ The clock never counts ticks. On wake or `visibilitychange` → visible, the cli
 - **Test alert:** 5 per hour (429: "You've sent 5 test alerts this hour. Try again later.").
 - **Pop-up alerts** have no monthly cap: browser push is free, and the once-per-session-per-browser rule bounds them.
 
-**Rate limits** (in-memory token buckets; the app runs as one instance):
+**Rate limits** (in-memory sliding windows, so "N per window" is exact; the app runs as one instance):
 
 | Route | Limit | Over the limit |
 |---|---|---|
@@ -1394,9 +1400,10 @@ After any timer error the client refetches `GET /api/timer`. `FL_STOP_TOO_LONG` 
     nudge: {after_minutes, due_at, acknowledged, active} | null,
     closed_session?: {id, seconds, run_seconds, dropped, end_reason, from: "running"|"paused"},
     already_running?: true,
-    resumed?: true }
+    resumed?: true,
+    unarchived?: true }
   ```
-  `run` is computed from `run_id` (§6). `closed_session` is absent when nothing was closed, including a stop from paused whose run has no surviving session. `resumed` is present only when a start on the paused task resumed its run (§6).
+  `run` is computed from `run_id` (§6). `closed_session` is absent when nothing was closed, including a stop from paused whose run has no surviving session. `resumed` is present only when a start on the paused task resumed its run (§6). `unarchived` is present only when a start by name revived an archived task (the client then shows "Unarchived Invoice prep.", F3).
 - `SessionRow`: `{ id, task: {id, name, archived}, project: {id, name, color, archived} | null, started_at, ended_at | null, duration_seconds | null, live_seconds | null, day_seconds?, source, end_reason, edited: boolean, is_example }`.
 
 **Auth**
@@ -1425,6 +1432,7 @@ After any timer error the client refetches `GET /api/timer`. `FL_STOP_TOO_LONG` 
 |---|---|---|---|
 | `GET /api/today` | — | 200 `{date, time_zone, total_seconds, server_now, sessions: SessionRow[] (with day_seconds)}` | — |
 | `GET /api/sessions` | query `q, range, from, to, projects, sort=date\|duration, cursor, limit≤50` | 200 `{rows: SessionRow[], next_cursor\|null, total_count, total_seconds, day_totals: [{date, seconds}]}`. `cursor` encodes (`started_at`, `id`) for `sort=date` and (`duration_seconds`, `id`) for `sort=duration`. `day_totals` has one entry per local start date that appears in `rows`, computed over the whole filtered set (§6). With `sort=duration` the running session, if it matches, is the first row of the first page only | 400 `VALIDATION` |
+| `GET /api/sessions/:id` | — | 200 `SessionRow` (used by History's `?session=<id>` deep link, for a session not on the loaded page) | 404 |
 | `POST /api/sessions` | `{task_id}` or `{task_name, project_id}`, plus `{started_at, ended_at}` | 201 `SessionRow` (source `manual`) | 400 `VALIDATION` (field messages); 409 `OVERLAP` (message names the conflicting session) |
 | `PATCH /api/sessions/:id` | any of `{task_id, started_at, ended_at}` | 200 `SessionRow` | 400 `VALIDATION`; 404; 409 `OVERLAP`; 409 `RUNNING_EDIT` ("Switch tasks from the Timer instead." / "Stop the timer to set an end time.") |
 | `DELETE /api/sessions/:id` | — | 204 | 404; 409 `RUNNING` |
@@ -1742,7 +1750,8 @@ VibeStack Builder builds Focus Log on GitHub (code), Railway (hosting) and Supab
    - Supabase's own emails are not used, because Focus Log sends the set-password link itself through Postmark.
 3. **Railway service.**
    - Connect the GitHub repo and set the root to `/`.
-   - Build command `npm ci && npm run build`. Start command `npm run start` (`next start -H 0.0.0.0 -p $PORT`).
+   - The service settings below live in `railway.json` at the repo root (config as code), so every deploy uses them.
+   - Build: `npm ci` (the lockfile is committed) then `npm run build`. Start command `npm run start` (`next start -H 0.0.0.0 -p $PORT`).
    - **Pre-deploy command `npm run migrate`**, which runs `supabase db push --db-url "$SUPABASE_DB_URL"`. This is how every release after launch applies its database changes.
      - It uses the Supabase CLI, from the `supabase` npm package, which is listed in `dependencies` so it is present when the deploy runs.
      - Railway runs this command after the build and before the new deployment starts, with the service's variables. Migrations can't run during the build, because the build has no database connection.
@@ -1772,7 +1781,7 @@ VibeStack Builder builds Focus Log on GitHub (code), Railway (hosting) and Supab
 | Name | Purpose |
 |---|---|
 | `PORT` | Port the web service binds to (Railway provides it) |
-| `APP_URL` | Public base URL (e.g. `https://focus-log.up.railway.app`), used in email links and the same-origin check |
+| `APP_URL` | Public base URL (e.g. `https://focus-log.up.railway.app`), used in email links and the same-origin check. Optional on Railway: when unset, the app uses `https://` + Railway's built-in `RAILWAY_PUBLIC_DOMAIN`. Set it when the app moves to a custom domain |
 | `SUPABASE_URL` | Supabase project URL |
 | `SUPABASE_ANON_KEY` | Public anon key for user-scoped, RLS-enforced requests (server-side only) |
 | `SUPABASE_SERVICE_ROLE_KEY` | Service-role key for the scheduler, `email_log` writes, `push_subscriptions` delivery writes, password-link generation, the seed and the data-removal function. Never sent to the browser |
