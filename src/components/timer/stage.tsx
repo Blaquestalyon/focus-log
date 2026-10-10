@@ -46,7 +46,7 @@ const ClockDigits = forwardRef<HTMLDivElement, { text: string; state: 'idle' | '
     </span>
   );
   return (
-    <div ref={ref} className="clock" data-state={state} data-entering={entering ? 'true' : 'false'} aria-hidden>
+    <div ref={ref} className="clock" data-state={state} data-long={text.length >= 8 ? 'true' : 'false'} data-entering={entering ? 'true' : 'false'} aria-hidden>
       {render('clock-gold text-gold')}
       {render('clock-flat')}
     </div>

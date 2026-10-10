@@ -152,7 +152,7 @@ Project palette (key → hex; each is ≥3:1 on `--color-surface`): `azure #4C8D
 
 | Role | Family / settings | Size / line-height |
 |---|---|---|
-| Clock | Archivo `wdth 125`, `wght 600`, tnum, tracking −0.02em | `clamp(64px, 11vw, 144px)` / 1.0 |
+| Clock | Archivo `wdth 125`, `wght 600`, tnum, tracking −0.02em | `clamp(64px, 11vw, 144px)` / 1.0, capped so the whole clock always fits its row: beside both flanks from 768px, alone below. On narrower windows (and once a run passes 10 hours) it shrinks rather than being cut off — chosen by the owner on 2026-10-09 |
 | Wordmark ("Focus Log") | Archivo `wdth 125`, `wght 800`, gold fill | 16px / 1 in the shell; 28px / 1.15 as the Sign in card's h1 |
 | Display number (Reports totals) | Archivo `wdth 125`, `wght 800`, tnum, gold fill | 48px / 1.1 |
 | Page title (h1) | Archivo `wdth 125`, `wght 800`, tracking −0.01em, gold fill | 28px / 1.15 |

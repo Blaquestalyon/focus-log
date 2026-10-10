@@ -190,6 +190,11 @@
   --size-stage-min-lg: 320px;
   --size-chart: 220px;
   --size-clock-skeleton: 360px;
+  /* The clock fits beside its flanks: left flank (160) + right flank (176) + two row gaps (2 x 32). */
+  --size-clock-flanks: 400px;
+  /* Clock text width in em: H:MM:SS, and HH:MM:SS once a run passes 10 hours (measured ~4.2 / ~4.8, plus margin). */
+  --clock-ems-short: 4.3;
+  --clock-ems-long: 4.9;
   --size-measure: 70ch;
   --size-edge: 3px;
   --size-focus: 2px;

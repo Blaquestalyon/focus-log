@@ -172,7 +172,7 @@
     pointer-events: none; overflow: hidden; border-radius: inherit;
   }
   .starfield svg { position: absolute; display: block; fill: var(--color-white); }
-  .stage-layer { position: relative; z-index: 2; }
+  .stage-layer { position: relative; z-index: 2; container-type: inline-size; }
   .light-pool {
     position: absolute; z-index: 1; pointer-events: none;
     width: 70%; height: 45%;
@@ -187,7 +187,10 @@
     font-family: var(--font-sans);
     font-variation-settings: "wdth" 125;
     font-weight: 600;
-    font-size: var(--text-clock);
+    /* §2 size, capped so the whole clock always fits its row (never clipped): alone below 768px,
+       beside both flanks from 768px. */
+    --clock-ems: var(--clock-ems-short);
+    font-size: min(var(--text-clock), calc(100cqi / var(--clock-ems)));
     line-height: 1;
     letter-spacing: -0.02em;
     font-feature-settings: "tnum" 1;
@@ -195,8 +198,13 @@
     white-space: nowrap;
     position: relative;
   }
+  .clock[data-long="true"] { --clock-ems: var(--clock-ems-long); }
+  @media (min-width: 768px) {
+    .clock { font-size: min(var(--text-clock), calc((100cqi - var(--size-clock-flanks)) / var(--clock-ems))); }
+  }
   /* Two stacked layers so the gold → flat colour change can crossfade. */
-  .clock-layer { transition: opacity var(--dur-stage) var(--ease-out); }
+  /* A little end padding so the last digit's ink stays inside the gold fill's box. */
+  .clock-layer { padding-inline-end: 0.05em; transition: opacity var(--dur-stage) var(--ease-out); }
   .clock-flat { position: absolute; inset: 0; color: var(--color-text-secondary); }
   .clock[data-state="running"] .clock-flat { opacity: 0; }
   .clock[data-state="running"] .clock-gold { opacity: 1; }
