@@ -13,8 +13,8 @@
 
 ## In progress
 - QA fix round (15 failures from snapshot 80b6a4f). Fixed in code and re-checked locally with the testers' own scripts against the local stand-in: icons folder created by the build step; starfields render (sign-in 14, stage 10, avoiding card/clock/bar/controls); gold hairline aligned with the first digit; running Today row reads `<1m`; single Esc closes dialogs and focus returns to the ⋯ trigger; `N` from other screens focuses the task box; muted text on overlays raised to secondary (help, shortcuts, palette) and the help link underlined; tab panels show the gold ring; popovers/selects inside dialogs sit above the dialog; hit targets (segmented 40/44, switches 40/44, mini-timers 40/44); History task column readable at tablet width; timer race returns the another-device message instead of a 500; `%`/`_` search escaped for PostgREST's quoted values.
-- This push carries the shared components and server fixes; the screen-level files (stage, Today, shell, shortcuts, help, palette, History, starfield) follow in the next push.
-- Still to do this round: commit the lockfile (npm ci), confirm literal `%` search end to end, owner turns off sign-ups in Supabase (T-A7), decisions.md entries.
+- All code fixes pushed (3d437a6, e4a2f83, 1721504, e144797, 5911ae5); literal `%` search and the parallel-start race (18 runs, no server errors) confirmed locally; trimmed lockfile committed so `npm ci` works (see decisions.md).
+- Waiting on the owner: turn off "Allow new users to sign up" in the Supabase dashboard (T-A7). Asked during this round; no answer yet. Re-ask at wiring if still open.
 
 ## Watch in QA
 - One React hydration warning (#418, text mismatch) appeared once on the Timer page during the first production click-through. It did not recur in three later production runs or in a development-mode run, which would have named the mismatching text. Likely a time-of-day boundary in server vs browser rendering; QA should watch for it.
