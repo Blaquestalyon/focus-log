@@ -125,3 +125,8 @@ Same behavior, same look, same checks. Dependencies unchanged (installed from th
 - **Sign-ups are off** (T-A7 resolved): the owner confirmed "Allow new users to sign up" shows off in the Supabase dashboard. The other Auth settings in that checklist (minimum password 10, OTP 3600s, Site URL) were in the same steps but not separately confirmed.
 - **Pop-up alerts: verified on the live app in Edge** (Allow alerts, then Send a test alert appeared). In the owner's Chrome "Work" profile, the browser's own push registration fails ("This browser couldn't turn on pop-ups"), while the app's side checked out (alert keys configured, the owner's account can save a browser; database grants and policies confirmed). The cause is outside the app (profile policy, network or VPN blocking Chrome's push service); no code change. The reminder email covers that browser.
 - **Review question:** the owner looked around and reported nothing missing ("everything looks and works good").
+
+## 2026-10-23 — Next.js 15.5.28 for published security advisories
+
+- **`next` 15.5.27 → 15.5.28**, still pinned exactly.
+  *Why:* 15.5.27 is covered by GHSA-p3m5-59mp-jv5r (high, 2026-10-22: denial of service in App Router apps that use Server Actions — this app has none) and GHSA-2464-fhr4-w9xw (critical, 2026-10-22: image optimisation through a `sharp` below 0.35.5 — this app's `sharp` is already 0.35.5); 15.5.28 has no published advisory. Checked: `npm ci` with npm 10.9.9, `npm run typecheck`, `npm test`, `npm run build` (its `prebuild` icon step runs `sharp`). `npm run lint` reports three raw pixel values at `src/components/ui/form.tsx:93`, a file this change does not touch.
