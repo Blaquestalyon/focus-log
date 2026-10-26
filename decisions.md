@@ -130,3 +130,18 @@ Same behavior, same look, same checks. Dependencies unchanged (installed from th
 
 - **`next` 15.5.27 → 15.5.28**, still pinned exactly.
   *Why:* 15.5.27 is covered by GHSA-p3m5-59mp-jv5r (high, 2026-10-22: denial of service in App Router apps that use Server Actions — this app has none) and GHSA-2464-fhr4-w9xw (critical, 2026-10-22: image optimisation through a `sharp` below 0.35.5 — this app's `sharp` is already 0.35.5); 15.5.28 has no published advisory. Checked: `npm ci` with npm 10.9.9, `npm run typecheck`, `npm test`, `npm run build` (its `prebuild` icon step runs `sharp`). `npm run lint` reports three raw pixel values at `src/components/ui/form.tsx:93`, a file this change does not touch.
+
+## 2026-10-24 — postcss, zod and vitest for published security advisories
+
+- **Next.js's bundled `postcss` replaced by the app's own, through `overrides`; the app's `postcss` 8.5.29 → 8.5.31, still pinned exactly.**
+  - *Why:* `next` 15.5.28 bundles postcss 8.4.31 at `node_modules/next/node_modules/postcss`. That copy is covered by four advisories: GHSA-6g55-p6wh-862q and GHSA-r28c-9q8g-f849 (high), and GHSA-qx2v-qp2m-jg93 and GHSA-fxqj-rqcc-2cmp (moderate).
+  - npm's only offered fix is Next 16. The override (`"postcss": "8.5.31"`, which npm requires to equal the direct spec) removes the nested copy instead.
+  - The app's own copy goes to 8.5.31 because vitest 5's `vite` requires `^8.5.30`.
+- **`zod` 4.6.5 → 4.6.7** (GHSA-mrhx-c7xc-m3w5, high, `< 4.6.6`).
+- **`vitest` 3.2.7 → 5.0.5** (dev). vitest 3 brings `tinypool` with GHSA-5gmw-xhrv-c9v3 and GHSA-85c8-ppgw-ccpr (critical), and `@vitest/mocker` with two moderate advisories. vitest 5 drops tinypool. `vitest.config.ts` needed no change.
+- *Checked:*
+  - `npm ci` with npm 10.9.9;
+  - `npm audit` reports 0 with and without dev;
+  - `npm run typecheck`, and `npm test` (39 tests, as before);
+  - `npm run build`, with the compiled CSS byte-identical to `main`;
+  - `npm run lint` reports the same three raw pixel values at `src/components/ui/form.tsx:93` as on `main`.
