@@ -32,37 +32,39 @@ Focus Log is a personal work timer for one person, its owner. It is a **website*
 ## 2. Design brief
 
 **WORLD**
-- **MOOD:** a broadcast booth after hours. The desk is navy-black, one gold readout is lit, and a small cyan "on air" lamp glows only while the clock is running. Everything else waits in the dark until it is needed.
+- **MOOD:** a private studio at night, lit by a violet glow from above and a warm gold lamp below. Frosted glass panels float in that light, edged and lit in gold, and the room is never perfectly still. Set by the owner on 2026-11-04 from the Focus Log feature image (`public/brand/welcome.webp`): *"dull and boring is out. let's make this more lively and dynamic."*
 - **COLOUR PLACEMENT:**
-  - *Navy-black layers* (`#07080D` → `#1E2336`): every background, panel, row and overlay. No surface in the app is white, light grey or pure `#000000`.
-  - *Metallic gold gradient* (`--gradient-gold`): used for three things.
-    - The running clock's digits.
+  - *Indigo-violet layers* (`#0B0918` → `#2A2250`): every background, row and overlay. Cards are glass panels (LIGHT). No surface in the app is white, light grey or pure `#000000`.
+  - *Metallic gold gradient* (`--gradient-gold`): used for these things.
     - The sparkle inside the Focus Log mark.
-    - The polished lettering taken from the owner's logo: the "Focus Log" wordmark (sidebar header, mobile top bar and the Sign in card), every page title (h1), and the display total on Reports.
+    - The headings that name a card: each Settings card title and the Reports "By day" title.
+    - The 2px hairline under the clock, with a soft gold glow.
+    - The polished lettering taken from the owner's logo: the "Focus Log" wordmark (sidebar header and mobile top bar), every page title (h1) including the sign-in card's "Welcome back", and the display total on Reports.
 
-    Never on buttons, body text, section or card headings, charts or borders.
+    Never on buttons, body text, charts or borders.
   - *Flat gold* (accent ramp, anchor `#D4A745`):
     - Primary buttons (Start, Resume, Save, Set password).
     - The 2px focus ring and the 2px active-nav indicator bar.
-    - The 1px hairline under the clock.
-    - The 1px rim around the Timer stage (the anchor at 45% opacity, `--color-rim`).
+    - The "Today" eyebrow over the Today list.
     - The selected segment of segmented controls, and checked switches and checkboxes.
     - Text links (`--color-accent-text`).
 
     Never as a page or panel background, never as a chart series, never on more than ~10% of a screen.
-  - *Electric cyan "signal"* (`#22C3FF`): the 8px on-air dot while a timer is running (on the stage, in the sidebar mini-timer and on the running row in Today), and the icon of info toasts. Never on buttons, text blocks or charts.
-  - *Ribbon gradient* (`--gradient-ribbon`, deep navy `#0B1E6E` → electric blue `#22C3FF`): exactly three places. Nowhere else.
+  - *Violet "signal"* (`#A78BFA`): the 8px on-air dot while a timer is running (on the stage, in the sidebar mini-timer and on the running row in Today), and the icon of info toasts. Never on buttons or text blocks.
+  - *Moonlit lavender-silver* (`--gradient-moon`, `#FFFFFF` → `#A99CE0`): the running clock's digits, as in the feature image.
+  - *Ribbon gradient* (`--gradient-ribbon`, violet `#5B3FD6` → lavender `#A78BFA` → gold `#E2BC5C`): exactly two places in the app. Nowhere else. (The two emails' 4px header band keeps the earlier navy-to-blue ribbon; the emails were not part of the 2026-11-04 restyle.)
     - The 2px top edge of the sign-in/set-password card.
-    - A 2px band across the full width of the top of the viewport on every signed-in screen, which is the sweep of blue in the owner's logo.
-    - The 4px header band of both emails.
+    - A 2px band across the full width of the top of the viewport on every signed-in screen.
   - *Warm white* (`#F4F1E8`): primary text and the white sparkle glyphs.
   - *Project colours* (8 fixed hues, below): only 8px project dots, 3px left edges of session rows, and chart segments. Never as text colour or as a background fill.
   - *Danger red*: destructive buttons and the confirm button of destructive dialogs only.
-- **LIGHT:** the running clock is the only light source.
-  - **While a timer runs:** a gold pool sits under the digits. It is a radial ellipse 70% wide × 45% tall of the stage, centred 8% below the digits' midline, `#D4A745` at 7% opacity in the centre fading to 0 at the edge.
-  - **On pause or stop:** the pool fades out in 300ms and the digits lose their gold.
-  - **Nothing else casts light.** The gold lettering and the stage rim are polished metal, not light: they never glow, carry no halo or shadow, and look the same whether or not the timer runs.
-  - **Elevation:** surfaces never carry shadows. Elevation is one step lighter surface plus a 1px border. Only things lifted off the desk toward the viewer carry a shadow (dialogs, the command palette, menus, popovers, toasts), and they share one: `0 16px 48px rgba(0,0,0,0.55)`.
+- **LIGHT:** the room is lit, and the light moves.
+  - **The room** (`--ambient`, fixed behind every screen): a violet glow from the top right, a warm gold lamp at the bottom left and a faint indigo wash, over `--color-bg-0`. A second, softer layer drifts slowly back and forth over 40s.
+  - **Glass panels:** every card is `.panel`: a translucent violet fill (`--panel-fill`) with a 14px backdrop blur, a 16px radius, a 1px lavender edge (`--panel-edge`) and a soft violet under-glow (`--panel-glow`) that brightens, with a faint gold ring, on hover.
+  - **Gold-edged surfaces** (`--gold-edge`, `--gold-glow`): the Timer stage, the Reports total card, the sign-in card and the welcome art. Each carries a gold rim and a gold halo over a violet under-glow.
+  - **Primary buttons** carry a soft gold glow (`--button-glow`) that brightens on hover.
+  - **While a timer runs:** the digits are moonlit lavender-silver with a soft violet glow, and a violet-and-gold pool sits under them (a radial ellipse 70% wide × 45% tall of the stage, centred 8% below the digits' midline). On pause or stop the pool fades out in 300ms and the digits lose their fill.
+  - **Overlays** (dialogs, the command palette, menus, popovers, toasts) share one shadow: `0 24px 64px rgba(4,2,14,0.6)` plus a 1px lavender ring.
 - **MOTIFS:**
   1. *The four-point sparkle* (taken from the white sparkles in the owner's logo): a four-point star with concave sides, drawn as inline SVG.
      - It is the app mark: a 16px sparkle in metallic gold inside a 24px ring with a 1.5px gold stroke.
@@ -74,26 +76,22 @@ Focus Log is a personal work timer for one person, its owner. It is a **website*
   3. *Flanking micro-labels*: uppercase JetBrains Mono 12px labels set either side of a big number, each a small label stacked over its value.
      - Clock: `PROJECT`/name on the left, `STARTED`/time on the right.
      - Reports total: `WEEK OF`/range on the left, `VS LAST WEEK`/delta on the right.
-  4. *The ribbon*: three placements only, listed above.
-  5. *The badge rim* (taken from the thin gold outline of the owner's badge): one 1px `--color-rim` border with an 8px radius around the Timer stage. It is the only gold-edged surface in the app. Every other card, panel and dialog keeps its quiet `--color-border` edge.
-  6. *Polished lettering* (taken from the heavy, wide, squared gold letters of "SHOW IT OFF"): Archivo at its widest and heaviest (`wdth 125`, `wght 800`), filled with `--gradient-gold`. It is used only for the wordmark, page titles and the Reports display total. Section headings, body text, labels and table text stay warm white or grey.
+  4. *The ribbon*: two placements in the app only, listed above.
+  5. *The gold edge*: a 1px `--gold-edge` rim with a gold halo, on the four gold-edged surfaces listed under LIGHT. Every other card is a glass panel with a lavender edge.
+  6. *Polished lettering* (taken from the heavy, wide, squared gold letters of "SHOW IT OFF"): Archivo at its widest and heaviest (`wdth 125`, `wght 800`), filled with `--gradient-gold`. It is used only for the wordmark, page titles, the Reports display total and the card-naming headings listed under the metallic gold gradient. Other headings, body text, labels and table text stay warm white or grey.
 - **NEVER:**
   - no light mode;
-  - no purple-to-blue SaaS gradient backgrounds;
-  - no frosted glass except the command palette;
-  - no card radius above 8px;
+  - no flat, unlit page: every screen sits in the room's light;
   - no confetti, fireworks, trophies or five-point stars;
   - no paragraphs in gold;
-  - no glow, halo or drop shadow on gold lettering;
   - no microphone, ribbon banner, badge imagery or "Get Discovered!" slogan (those belong to Show It Off, not Focus Log);
-  - no stock illustrations or photos;
+  - no stock illustrations or photos (the welcome art is the owner's own feature image);
   - no lone spinner standing in for content;
-  - no colour-filled page backgrounds;
   - no bouncing or springy easing.
 
-**LINEAGE.** The starting point is Obsidian: dark-first, keyboard-forward, borders over shadows, fast motion. Focus Log departs from it in four ways. The accent is a metallic gold taken from the owner's logo, not a cold single hue. The neutrals carry the navy undertone of the logo's starfield instead of neutral grey. The main screen is a single subject on a stage (one clock in a void) instead of a dense list. Density lives only on Reports and History.
+**LINEAGE.** The starting point is Obsidian: dark-first, keyboard-forward, fast motion. Focus Log departs from it in four ways. The accent is a metallic gold taken from the owner's logo, not a cold single hue. The neutrals carry an indigo-violet undertone instead of neutral grey, and cards are lit glass rather than flat borders. The main screen is a single subject on a stage (one clock in a void) instead of a dense list. Density lives only on Reports and History.
 
-**ANCHOR + RAMP** (neutral temperature: **cool, navy-tinted grey**)
+**ANCHOR + RAMP** (neutral temperature: **cool, indigo-violet-tinted**)
 | Token | Hex | Role |
 |---|---|---|
 | `--color-accent-subtle` | `#221B0E` | selected row / selected segment background |
@@ -105,11 +103,11 @@ Focus Log is a personal work timer for one person, its owner. It is a **website*
 | `--color-on-accent` | `#0B0B10` | text/icons on gold buttons |
 
 **WCAG AA (checked):**
-- `#D4A745` on `#0C0E16` = 8.6:1.
+- `#D4A745` on `#0F0C21` = 8.6:1.
 - `#0B0B10` on `#D4A745` = 8.8:1.
-- `#E8C468` on `#121522` = 10.8:1.
-- `#7F849A` muted text on `#0C0E16` = 5.2:1, and on `#191D2D` = 4.5:1, so muted text may never sit on anything lighter than `--color-surface-raised`.
-- The darkest gradient stop of the clock (`#B98A2C`) on `#0C0E16` = 6.2:1. The same stop under the gold lettering measures 6.4:1 on `--color-bg-0` (the sidebar wordmark) and 5.8:1 on `--color-surface` (the Sign in card and the Reports total card), so the lettering passes AA at every size it is used.
+- `#E8C468` on `--color-surface-raised` (`#241D45`) = 9.4:1.
+- Re-checked for the 2026-11-04 palette: `#948DB5` muted text = 6.2:1 on `#0F0C21`, 5.0:1 on `--color-surface-raised` and 4.7:1 on `--color-surface-overlay`; `#C3BEDA` secondary text is at least 8.1:1 and `#D4A745` gold at least 6.5:1 on every surface.
+- The darkest stop of the gold lettering (`#B98A2C`) measures 6.3:1 on `--color-bg-0` (the sidebar wordmark) and 5.0:1 on `--color-surface-raised`. Glass panels are translucent, so their effective colour depends on the room light behind them; at the brightest point (top right) muted text and that gold stop estimate at about 4.5:1, which passes AA but only just.
 - The stage rim is decorative (the stage is also identified by its heading and controls), so it carries no contrast requirement.
 - Danger buttons use `#C9353F` with white text (5.2:1), because the brighter `#E5484D` fails at 3.9:1. `#FF5C6C` is used only as text/icon colour on dark (6.4:1).
 - No working-shade shift is needed for the gold.
@@ -117,30 +115,30 @@ Focus Log is a personal work timer for one person, its owner. It is a **website*
 **Neutrals and semantics:**
 | Token | Value | Use |
 |---|---|---|
-| `--color-bg-0` | `#07080D` | app canvas, sidebar |
-| `--color-bg-1` | `#0C0E16` | content region |
-| `--color-surface` | `#121522` | cards, table rows |
-| `--color-surface-raised` | `#191D2D` | row hover, inputs, menus |
-| `--color-surface-overlay` | `#1E2336` | dialogs; the palette uses it at 88% opacity with `backdrop-filter: blur(16px)` |
-| `--color-border` | `#262B3F` | |
-| `--color-border-strong` | `#363C56` | |
-| `--color-rim` | `rgba(212,167,69,0.45)` | Timer stage rim only |
+| `--color-bg-0` | `#0B0918` | app canvas, under the room's light; the sidebar and mobile bar are this at 60% with a 14px blur |
+| `--color-bg-1` | `#0F0C21` | sticky table headers and History day headers |
+| `--color-surface` | `rgba(34,27,68,0.55)` | table rows, active nav item |
+| `--color-surface-raised` | `#241D45` | row hover, inputs, menus |
+| `--color-surface-overlay` | `#2A2250` | dialogs; the palette uses it at 88% opacity with `backdrop-filter: blur(16px)` |
+| `--color-border` | `#2E2654` | |
+| `--color-border-strong` | `#45397A` | |
 | `--color-text-primary` | `#F4F1E8` | |
-| `--color-text-secondary` | `#B4B7C6` | |
-| `--color-text-muted` | `#7F849A` | |
-| `--color-text-disabled` | `#555A70` | |
-| `--color-signal` | `#22C3FF` | |
+| `--color-text-secondary` | `#C3BEDA` | |
+| `--color-text-muted` | `#948DB5` | |
+| `--color-text-disabled` | `#625C82` | |
+| `--color-signal` | `#A78BFA` | |
 | `--color-success` | `#3DD68C` | |
 | `--color-warning` | `#FF9F43` | |
 | `--color-danger` | `#C9353F` | hover `#B12D36` |
 | `--color-danger-text` | `#FF5C6C` | |
-| `--color-info` | `#22C3FF` | |
+| `--color-info` | `#A78BFA` | |
 
 Gradients:
 - `--gradient-gold: linear-gradient(180deg,#F7E7A6 0%,#E2BC5C 42%,#B98A2C 68%,#EFD27A 100%)`
-- `--gradient-ribbon: linear-gradient(90deg,#0B1E6E 0%,#1546C9 45%,#22C3FF 100%)`
+- `--gradient-ribbon: linear-gradient(90deg,#5B3FD6 0%,#A78BFA 50%,#E2BC5C 100%)`
+- `--gradient-moon: linear-gradient(180deg,#FFFFFF 0%,#E6E0FF 45%,#A99CE0 100%)`
 
-Project palette (key → hex; each is ≥3:1 on `--color-surface`): `azure #4C8DFF`, `violet #9B7BFF`, `rose #FF6B9A`, `coral #FF8A5B`, `lime #A6E05A`, `teal #2ED3B7`, `sand #C9B48A`, `slate #8A93B8`. Gold and cyan are deliberately left out, because they mean "action" and "on air".
+Project palette (key → hex; each is ≥3:1 on `--color-surface`): `azure #4C8DFF`, `violet #9B7BFF`, `rose #FF6B9A`, `coral #FF8A5B`, `lime #A6E05A`, `teal #2ED3B7`, `sand #C9B48A`, `slate #8A93B8`. Gold is deliberately left out, because it means "action". `violet` sits close to the violet on-air dot, which is told apart by its breathing halo.
 
 **POSTURE:** dark only. A light mode does not ship (the owner's brand is black-first and the app has a single user). `color-scheme: dark` is set on `:root`.
 
@@ -153,7 +151,7 @@ Project palette (key → hex; each is ≥3:1 on `--color-surface`): `azure #4C8D
 | Role | Family / settings | Size / line-height |
 |---|---|---|
 | Clock | Archivo `wdth 125`, `wght 600`, tnum, tracking −0.02em | `clamp(64px, 11vw, 144px)` / 1.0, capped so the whole clock always fits its row: beside both flanks from 768px, alone below. On narrower windows (and once a run passes 10 hours) it shrinks rather than being cut off — chosen by the owner on 2026-10-09 |
-| Wordmark ("Focus Log") | Archivo `wdth 125`, `wght 800`, gold fill | 16px / 1 in the shell; 28px / 1.15 as the Sign in card's h1 |
+| Wordmark ("Focus Log") | Archivo `wdth 125`, `wght 800`, gold fill | 16px / 1 in the shell |
 | Display number (Reports totals) | Archivo `wdth 125`, `wght 800`, tnum, gold fill | 48px / 1.1 |
 | Page title (h1) | Archivo `wdth 125`, `wght 800`, tracking −0.01em, gold fill | 28px / 1.15 |
 | Section heading (h2) | Archivo `wdth 100`, `wght 600` | 20px / 1.25 |
@@ -168,12 +166,13 @@ Project palette (key → hex; each is ≥3:1 on `--color-surface`): `azure #4C8D
 
 **Spacing** follows a 4px grid: tokens `--space-1` 4px through `--space-20` 80px (4, 8, 12, 16, 20, 24, 32, 40, 48, 64, 80).
 
-**RADIUS:** sharp.
-- 4px for buttons, inputs, chips and kbd.
-- 8px for cards, panels, dialogs, the palette, toasts and the Timer stage rim.
-- 999px only for status pills and the on-air dot.
+**RADIUS:** soft.
+- 8px for buttons, inputs, chips and kbd.
+- 16px for cards, panels, dialogs, the palette, toasts and the Timer stage.
+- 24px for the welcome art.
+- 999px only for status pills, the on-air dot and the clock hairline.
 
-**ELEVATION:** borders only, plus the single overlay shadow defined under LIGHT.
+**ELEVATION:** glass panels with an under-glow, the gold-edged surfaces, and the single overlay shadow, all defined under LIGHT.
 
 **MOTION tokens:**
 | Token | Value | Use |
@@ -182,29 +181,33 @@ Project palette (key → hex; each is ≥3:1 on `--color-surface`): `azure #4C8D
 | `--dur-base` | 200ms | menus, toasts, list insert/remove |
 | `--dur-panel` | 260ms | dialogs, drawer, palette |
 | `--dur-stage` | 300ms | light-pool fade, clock colour change |
+| `--dur-rise` | 520ms | every panel and the Timer stage rise 12px and fade in when they appear |
+| `--dur-twinkle` | 4.8s | each starfield sparkle slowly shrinks, turns and brightens (every third one is pale gold, on 6.2s) |
+| `--dur-drift` | 40s | the room's second light layer drifts back and forth |
+| `--dur-float` / `--dur-sweep` | 9s / 7s | the welcome art floats 6px up and down; a soft light sweeps across it |
 | `--ease-out` | `cubic-bezier(0.16,1,0.3,1)` | entrances |
 | `--ease-in` | `cubic-bezier(0.7,0,0.84,0)` | exits |
 
 - **Entrances:** dialogs and the palette enter with opacity 0→1 plus scale 0.98→1. Menus enter with opacity plus a 4px downward translate, and toasts with opacity plus an 8px upward translate.
-- **Reduced motion** (`prefers-reduced-motion: reduce`): every translate, scale and stagger collapses to a 120ms opacity fade. The digit stagger and the logged sparkle are skipped, and the light pool appears and disappears with a 120ms fade.
+- **Reduced motion** (`prefers-reduced-motion: reduce`): every translate, scale and stagger collapses to a 120ms opacity fade. The digit stagger and the logged sparkle are skipped, the light pool appears and disappears with a 120ms fade, and the twinkle, drift, float and sweep do not run.
 
 **Z-index tokens:** base 0, sticky 10, sidebar 20, dropdown 40, drawer 50, dialog 60, palette 70, toast 80, tooltip 90. A popover or select opened from inside a dialog uses the layer just above the dialog (`--z-dialog` + 1), so it is never hidden behind the dialog's backdrop.
 
 **SIGNATURE MOMENTS**
-1. **The Stage** (Timer screen hero, signed-in `/`). The upper part of the Timer screen is a void framed by the badge rim: 1px `--color-rim`, 8px radius. Its min-height is 320px at ≥1024px and 240px below that. It holds only the task name (h2), the clock, the flanking micro-labels, the gold hairline and the controls, set over a still starfield.
-   - *Running:* the clock digits (`H:MM:SS`, e.g. `1:02:09`) are filled with `--gradient-gold` via `background-clip: text`, with `forced-colors` fallback `CanvasText`. The light pool glows beneath them. An 8px cyan on-air dot sits left of the task name with a soft halo (`box-shadow: 0 0 0 4px rgba(34,195,255,0.18)`) that breathes in opacity 0.18↔0.06 over 2.4s. The halo is static under reduced motion.
+1. **The Stage** (Timer screen hero, signed-in `/`). The upper part of the Timer screen is a gold-edged glass panel (LIGHT): 1px `--gold-edge`, 16px radius. Its min-height is 320px at ≥1024px and 240px below that. It holds only the task name (h2), the clock, the flanking micro-labels, the gold hairline and the controls, set over a twinkling starfield.
+   - *Running:* the clock digits (`H:MM:SS`, e.g. `1:02:09`) are filled with `--gradient-moon` via `background-clip: text` and carry a soft violet glow, with `forced-colors` fallback `CanvasText`. The light pool glows beneath them. An 8px violet on-air dot sits left of the task name with a soft halo that breathes over 2.4s. The halo is static under reduced motion.
    - *Starting:* when a timer starts, the digits enter one character at a time, left to right, 30ms apart. Each character fades from 0 and rises 4px over 180ms with `--ease-out`.
-   - *Pausing:* the digit fill crossfades over 300ms from gold to flat `--color-text-secondary`, the pool fades out, the on-air dot becomes a 2px-stroked hollow circle in `--color-text-muted`, and the right flank label changes to `PAUSED` with the pause time (e.g. `12:04 PM`).
+   - *Pausing:* the digit fill crossfades over 300ms from lavender-silver to flat `--color-text-secondary`, the pool fades out, the on-air dot becomes a 2px-stroked hollow circle in `--color-text-muted`, and the right flank label changes to `PAUSED` with the pause time (e.g. `12:04 PM`).
    - *Idle:* the clock shows `0:00:00` in `--color-text-disabled` and the flanks are hidden.
-   - *Starfield:* 10 white four-point sparkles inside the rim, at sizes 5–12px and opacities 4–8%.
+   - *Starfield:* 10 four-point sparkles inside the rim, at sizes 5–12px and opacities 4–8%; every third is pale gold.
      - They are positioned by a fixed seed, so they never change between visits.
      - They sit behind every other layer of the stage, including the light pool.
-     - They are `aria-hidden` and `pointer-events: none`, and never animate.
+     - They are `aria-hidden` and `pointer-events: none`, and twinkle slowly (MOTION).
      - None falls inside the clock's box, the task bar or the controls row.
      - They are hidden under `forced-colors`.
      - The rim and the starfield look the same in every timer state.
    - *Tab title:* while running, the document title updates every second to `▶ 1:02:09 · Invoice prep — Focus Log`. While paused it reads `❚❚ 1:02:09 · Invoice prep — Focus Log`, and while idle `Focus Log`. In a background tab, browsers may slow this update to about once a minute, and that is accepted.
-   - *Sign-in screen:* this and the Timer stage are the only places the sparkle is used as atmosphere. A fixed, non-animated field of 14 white sparkles sits on the sign-in canvas, at sizes 6–14px and opacities 4–10%, positioned by a fixed seed so it never changes between visits, and none falls inside the 400px card.
+   - *Sign-in screen:* this and the Timer stage are the only places the sparkle is used as atmosphere. A field of 18 twinkling sparkles sits on the sign-in canvas, at sizes 6–14px and opacities 8–22%, positioned by a fixed seed so it never changes between visits, and none falls inside the welcome art or the card.
 2. **The logged sparkle.** When a session is closed by Pause, Stop or Switch, its row slides into the top of the Today list (height 0→40px plus fade, `--dur-base`, `--ease-out`). A single 12px white four-point sparkle then scales 0→1→0 and rotates 0→45° over 600ms, centred on the row's duration cell, once per logged session. The Today total in the Today header counts up from its old value to its new value over 400ms (tabular digits, so nothing shifts). Under reduced motion the row fades in, there is no sparkle, and the total updates instantly.
 
 **VOICE:** brief, plain and precise, with a quiet warmth. It never cheers, never uses exclamation marks except in the weekly email subject, and always states the number.
@@ -219,12 +222,12 @@ Project palette (key → hex; each is ≥3:1 on `--color-surface`): `azure #4C8D
 | 11x | The 1px hairline rule set under a display headline at about 40% of its width, which becomes the gold hairline under the clock; −0.02em tracking at display size; one confident light element on a dark field. |
 | 21 TSI | The single subject in a void: nothing above the fold on the Timer screen except the clock and its controls; the full-width hairline above quiet uppercase labels, used under page titles with micro-labels above the content. |
 | Amrit Palace | Small uppercase labels flanking the display text left and right (`PROJECT` / `STARTED`); display text entering letter by letter, used for the clock's digits when a timer starts. |
-| Dala | Sparse luminous particles on black velvet, used for the fixed starfields on sign-in (4–10% opacity) and behind the Timer stage (4–8%); a gold uppercase eyebrow above plain body copy (the Reports range eyebrow, the email headers). |
+| Dala | Sparse luminous particles on black velvet, used for the seeded starfields on sign-in (8–22% opacity) and behind the Timer stage (4–8%); a gold uppercase eyebrow above plain body copy (the Reports range eyebrow, the email headers). |
 | Integrated Biosciences | Monospace uppercase labels inside a segmented control (`WEEK │ MONTH`, History presets); a button paired with a separate square chip, used as the Start button with its attached `⏎` key chip. |
 | Steep | Data cards with one big tabular figure and a small muted comparison line beneath; two-column lists with right-aligned numerals (Reports "By project"). |
-| Superhuman | A translucent overlay panel with backdrop blur, used only for the ⌘K palette; a dark command input with an accent chip holding the action key. |
+| Superhuman | A translucent overlay panel with backdrop blur, used for the ⌘K palette; a dark command input with an accent chip holding the action key. |
 
-(MEDIUM is omitted. The owner's logo set both the colours and the style: the polished gold lettering, the thin gold rim, the navy-to-electric-blue sweep and the night-sky sparkles. Every surface in Focus Log is coded in CSS and SVG, with no generated imagery, and nothing from the logo is reproduced as an image.)
+(MEDIUM: since 2026-11-04 the owner's Focus Log feature image sets the look: violet-lit glass panels, gold edges and lettering, moonlit digits. It appears as the welcome art on the sign-in and set-password screens (`public/brand/welcome.webp`). Every other surface is coded in CSS and SVG.)
 
 ## 3. Data model
 
@@ -526,12 +529,12 @@ Focus Log has seven screens. Two are for signed-out visitors (Sign in, Set passw
 
 | Control | Default | Hover | Focus-visible | Active / pressed | Disabled |
 |---|---|---|---|---|---|
-| Primary button (gold) | `--color-accent` bg, `--color-on-accent` text, 4px radius | `--color-accent-hover` | 2px `--color-accent` ring, 2px offset in `--color-bg-1` | `--color-accent-pressed` | opacity 0.4, `cursor:not-allowed`, `aria-disabled="true"`, click handler inert |
+| Primary button (gold) | `--color-accent` bg, `--color-on-accent` text, 8px radius | `--color-accent-hover` | 2px `--color-accent` ring, 2px offset in `--color-bg-1` | `--color-accent-pressed` | opacity 0.4, `cursor:not-allowed`, `aria-disabled="true"`, click handler inert |
 | Secondary button | `--color-surface-raised` bg, 1px `--color-border-strong`, `--color-text-primary` | bg `--color-surface-overlay` | same ring | bg `--color-surface` | same as primary |
 | Ghost button | transparent, `--color-text-secondary` | bg `--color-surface-raised`, text primary | same ring | bg `--color-surface` | same |
 | Danger button | `--color-danger` bg, white text | `--color-danger-hover` (`#B12D36`) | same ring | `#9E2830` | same |
 | Icon-only button | 40×40 hit area, 16px Lucide icon in `--color-text-secondary`, tooltip required | bg `--color-surface-raised`, icon primary | same ring | bg `--color-surface` | same |
-| Text input / select | 40px tall, `--color-surface-raised` bg, 1px `--color-border`, 4px radius | border `--color-border-strong` | same ring | n/a | opacity 0.5, not editable |
+| Text input / select | 40px tall, `--color-surface-raised` bg, 1px `--color-border`, 8px radius | border `--color-border-strong` | same ring | n/a | opacity 0.5, not editable |
 | Input with error | border `--color-danger-text`, plus a message under the field: 13px `--color-danger-text` with 14px `CircleAlert` icon, linked by `aria-describedby` | — | — | — | — |
 | Switch / checkbox | off: `--color-border-strong` track; on: `--color-accent` track, `--color-on-accent` thumb | track lightens one step | same ring | — | opacity 0.4, inert |
 | Segmented control | JetBrains Mono 12px uppercase; unselected text muted | text secondary | same ring | — | — |
@@ -545,18 +548,18 @@ Focus Log has seven screens. Two are for signed-out visitors (Sign in, Set passw
 - **When validation runs:** on blur and on submit, never while typing. The first invalid field receives focus on submit.
 
 **Shared overlays and keyboard behaviour**
-- **Tooltips:** Radix Tooltip with a 400ms open delay, opened by hover and by keyboard focus. They have an `--color-surface-overlay` background, 1px border, 12px text, 4px radius and 8px padding, and fade in over 140ms. Every icon-only button and every truncated label has one, and a truncated label's tooltip shows the full text.
+- **Tooltips:** Radix Tooltip with a 400ms open delay, opened by hover and by keyboard focus. They have an `--color-surface-overlay` background, 1px border, 12px text, 8px radius and 8px padding, and fade in over 140ms. Every icon-only button and every truncated label has one, and a truncated label's tooltip shows the full text.
 - **Menus (⋯):** each menu is triggered by a `MoreHorizontal` icon button whose tooltip is "More actions".
-  - Menus are Radix DropdownMenu with 8px radius, the overlay shadow, 36px items, arrow-key navigation, Enter to select and Esc to close.
+  - Menus are Radix DropdownMenu with 16px radius, the overlay shadow, 36px items, arrow-key navigation, Enter to select and Esc to close.
   - Destructive items use `--color-danger-text` with a `Trash2` icon and sit last, below a separator.
-- **Dialogs:** Radix Dialog, max width 480px (560px for the session dialogs), 8px radius, `--color-surface-overlay` background, overlay shadow, and a backdrop of `rgba(7,8,13,0.72)`.
+- **Dialogs:** Radix Dialog, max width 480px (560px for the session dialogs), 16px radius, `--color-surface-overlay` background, overlay shadow, and a backdrop of `rgba(8,6,20,0.72)`.
   - A Close icon button (`X`, tooltip "Close") sits in the top-right corner and is last in the tab order, so opening a dialog focuses its first field (or Cancel); a dialog with nothing to fill in focuses itself. A dialog opened from a ⋯ menu returns focus to that ⋯ button when it closes.
   - Text inside dialogs and the palette that would be muted elsewhere uses `--color-text-secondary` (the overlay surface is lighter than `--color-surface-raised`), and links inside running text are underlined.
   - Focus is trapped inside. Esc and Cancel close the dialog, and focus returns to the trigger.
   - The footer has buttons right-aligned, with Cancel (ghost) to the left of the confirm button.
 - **Confirm dialogs for deletes:** the title names the thing being deleted, and the confirm button is a danger button whose label repeats the verb.
 - **Toasts:** Sonner, styled to the tokens.
-  - They sit in the bottom-right corner (bottom-centre below 768px) with 8px radius, an `--color-surface-overlay` background and the overlay shadow.
+  - They sit in the bottom-right corner (bottom-centre below 768px) with 16px radius, an `--color-surface-overlay` background and the overlay shadow.
   - Each has an icon: `CircleCheck` in `--color-success`, `Info` in `--color-signal`, or `CircleAlert` in `--color-danger-text`.
   - They auto-dismiss after 5s (errors after 6s), and at most 3 are visible. Any **Undo** action uses `--color-accent-text`.
   - The toast region is `aria-live="polite"`, and errors are announced assertively.
@@ -573,7 +576,7 @@ Focus Log has seven screens. Two are for signed-out visitors (Sign in, Set passw
   1. **Header:** the mark (sparkle in a ring, §2) plus the wordmark "Focus Log" in the polished gold lettering (Archivo `wdth 125`, `wght 800`, 16px, `--gradient-gold` fill, §2).
   2. **Search or jump:** a secondary-style button reading "Search or jump…" with a `⌘K` kbd chip (`Ctrl K` on Windows/Linux). It opens the palette.
   3. **Navigation:** Timer (`Timer`), Reports (`ChartColumn`), History (`History`), Your data (`Database`) and Settings (`Settings`). Items are 40px tall with a 16px icon and a 14px label. The active item has a `--color-surface` background, primary text and a 2px gold indicator bar on its left edge.
-  4. **Mini-timer** (shown only while running or paused): an 8px cyan dot (a hollow muted circle when paused), the task name truncated to 1 line, and `H:MM:SS` tabular. Clicking it goes to `/`.
+  4. **Mini-timer** (shown only while running or paused): an 8px violet on-air dot (a hollow muted circle when paused), the task name truncated to 1 line, and `H:MM:SS` tabular. Clicking it goes to `/`.
   5. **Footer:** Help (`CircleHelp`) opens the "How Focus Log works" dialog. Below it are the owner's email (13px muted, truncated with tooltip) and a Sign out icon button (`LogOut`, tooltip "Sign out").
 - **Icon rail (768–1023px):** the sidebar collapses to a 64px rail with icons only. Every icon has a tooltip, and the mini-timer shrinks to its dot plus `H:MM`.
 - **Mobile bar (<768px):** a 56px top bar holds the mark, the gold "Focus Log" wordmark, the mini-timer pill (when active) and a `Menu` icon button (tooltip "Open menu"). The button opens a left drawer (280px, 260ms) containing the full sidebar.
@@ -585,7 +588,7 @@ Focus Log has seven screens. Two are for signed-out visitors (Sign in, Set passw
 - **Service worker and alert sign-up:** on every signed-in page load the shell registers `/sw.js` (scope `/`). When this browser has granted alerts and holds a push sign-up, the shell re-saves that sign-up (§5 F21). The service worker only shows pop-up alerts and opens Focus Log when one is clicked. It caches nothing and never serves pages (§8). The root layout links `/manifest.webmanifest`, sets `theme-color` `#07080D`, and links `/icons/icon-192.png` as the Apple touch icon.
 
 **Command palette (`⌘K`)**
-- **Appearance:** cmdk inside a dialog, 640px wide, 15vh from the top. It uses `--color-surface-overlay` at 88% opacity with a 16px backdrop blur, the only frosted surface in the app.
+- **Appearance:** cmdk inside a dialog, 640px wide, 15vh from the top. It uses `--color-surface-overlay` at 88% opacity with a 16px backdrop blur.
 - **Input:** 48px tall, placeholder "Type a command or a task to start…". The active result shows a `⏎` gold-text kbd chip.
 - **Groups** (at most 8 results each, filtered by fuzzy match):
   - **Timer:** Pause, Resume, Stop, Stop at…, Discard timer (each shown only when valid).
@@ -598,8 +601,10 @@ Focus Log has seven screens. Two are for signed-out visitors (Sign in, Set passw
 ### Screen: Sign in
 **Purpose:** the owner signs in. Route `/sign-in`. A visitor who is already signed in is sent to `next` or `/`.
 **Layout:**
-- **Canvas and card:** a full-viewport `--color-bg-0` canvas with the fixed 14-sparkle field (§2, Signature moment 1). Centred on it is a 400px card (`--color-surface`, 1px border, 8px radius, 32px padding) with a 2px `--gradient-ribbon` top edge.
-- **Card header:** the mark at 40px, "Focus Log" as h1 in the gold wordmark lettering (28px, `wdth 125`, `wght 800`, `--gradient-gold` fill, §2), and the subtitle "Sign in to your timer." (secondary text).
+- **Canvas:** a full-viewport canvas in the room's light with the twinkling 18-sparkle field (§2, Signature moment 1). It holds two things, side by side from 1024px (the art takes the remaining width, the card 400px) and stacked below that (art first):
+  - **The welcome art:** the owner's feature image (`/brand/welcome.webp`, 1672×941), in a gold-edged frame with a 24px radius. It scales in on arrival, then floats gently while a soft light sweeps across it. Alt text: "Focus Log. Own your focus. Track your work. A private focus and time-tracking app built for individuals, shown on a laptop with its Timer, Reports, History, Settings and Your data screens."
+  - **The card:** a 400px gold-edged glass panel (32px padding) with a 2px `--gradient-ribbon` top edge, rising in just after the art.
+- **Card header:** the mark at 40px, "Welcome back" as h1 in the gold wordmark lettering (28px, `wdth 125`, `wght 800`, `--gradient-gold` fill, §2), and the subtitle "Sign in to your personal workspace." (secondary text).
 - **Expired-session notice:** when `?expired=1`, a muted info line with an `Info` icon above the form reads: "You were signed out. Sign in to pick up where you left off — your timer kept running."
 **Components:**
 - **Email field:** `type=email`, `autocomplete=username`, prefilled empty.
@@ -640,7 +645,7 @@ Focus Log has seven screens. Two are for signed-out visitors (Sign in, Set passw
 **Purpose:** the heart of the app. Start, pause, resume, switch and stop, and see today's sessions without leaving the screen. Route `/`.
 **Page header:** the h1 "Timer" with the subtitle (13px, secondary) `Wednesday, October 8`, and on the right a secondary button **Add time** (`Plus` icon).
 
-**Notices** (stacked above the stage, each 8px radius, `--color-surface`, 1px border, dismiss icon button `X` with tooltip "Dismiss"):
+**Notices** (stacked above the stage, each a glass panel (§2 LIGHT), dismiss icon button `X` with tooltip "Dismiss"):
 1. **Example data** (while any `is_example` row exists and `user_settings.example_notice_dismissed_at` is null): "You're looking at example data so you can see how things work." The button **Remove example data** opens the confirm dialog described on Your data.
    - Dismissing it hides it at once and sends `PATCH /api/settings { example_notice_dismissed: true }`, so it stays hidden on Timer, Reports and History on every computer.
    - If that save fails, the notice comes back and an error toast reads "Couldn't save that change. Try again."
@@ -676,7 +681,7 @@ Focus Log has seven screens. Two are for signed-out visitors (Sign in, Set passw
 - **Text:** the title "Your timer has been running for 4h 03m." (refreshed every minute) and the body "Still on Invoice prep? It's been running since 9:02 AM without a pause."
 - **Buttons:** **Keep going** (secondary; acknowledges, so the banner hides and no reminder email or further pop-up goes out for this session if it hasn't already, and an open pop-up for it in this browser is closed), **Stop now** (primary) and **Stop at…** (ghost; opens the Stop at dialog).
 
-**The Stage** (Signature moment 1; a void on `--color-bg-1` framed by the 1px `--color-rim` badge rim with an 8px radius, inner padding 32px (16px below 768px), min-height 320px at ≥1024px and 240px below, with the fixed 10-sparkle starfield inside the rim, §2):
+**The Stage** (Signature moment 1; a gold-edged glass panel, 1px `--gold-edge` with a 16px radius, inner padding 32px (16px below 768px), min-height 320px at ≥1024px and 240px below, with the twinkling 10-sparkle starfield inside the rim, §2):
 - **Task bar (top row)** is a combobox, a project picker and the Start button.
   - **Task combobox:**
     - Its visually hidden label is "What are you working on?". The placeholder reads "What are you working on?" when idle or paused and "Switch to another task…" while running.
@@ -694,11 +699,11 @@ Focus Log has seven screens. Two are for signed-out visitors (Sign in, Set passw
   - **Start button** (primary, 44px):
     - The label reads **Switch** while running and **Start** when idle.
     - While paused it reads **Resume** when the task it would start is the paused task: either the highlighted or selected option is that task, or the typed text matches its name (trimmed, case-insensitive) with the project picker showing its project. Pressing it then resumes the run (§6). Otherwise it reads **Start**.
-    - It carries an attached 44×44 square `⏎` chip (`--color-surface-raised`, 1px border, 4px radius, `aria-hidden`), separated by 4px.
+    - It carries an attached 44×44 square `⏎` chip (`--color-surface-raised`, 1px border, 8px radius, `aria-hidden`), separated by 4px.
     - It is disabled when the input is empty and nothing is selected, with the tooltip "Type a task or pick one below".
 - **Task line:**
   - The h2 shows the task name, truncated to 1 line with a tooltip.
-  - Running: the 8px cyan on-air dot sits to its left.
+  - Running: the 8px violet on-air dot sits to its left.
   - Paused: a hollow muted circle replaces the dot.
   - Idle: the task line reads "Ready when you are." in muted text.
 - **Clock** (the §2 type role):
@@ -723,16 +728,16 @@ Focus Log has seven screens. Two are for signed-out visitors (Sign in, Set passw
 
 **Recent row** (under the stage; hidden when there are no active tasks):
 - **Contents:** the micro-label `RECENT`, then up to 6 chips for the most recently used active tasks, excluding the one on the clock.
-- **Chip:** 32px tall with a 40px hit area, 4px radius, `--color-surface` background and a 1px border. It shows a project dot and the task name truncated at 24 characters, with the tooltip "Invoice prep · Power in Numbers — Admin". A `Play` icon appears on hover and focus.
+- **Chip:** 32px tall with a 40px hit area, 8px radius, `--color-surface` background and a 1px border. It shows a project dot and the task name truncated at 24 characters, with the tooltip "Invoice prep · Power in Numbers — Admin". A `Play` icon appears on hover and focus.
 - **Click:** starts the task when idle or paused, or switches to it while running.
 
-**Today panel** (below; `--color-surface`, 1px border, 8px radius):
-- **Header row:** the micro-label `TODAY`, the date `Wed, Oct 8` in secondary text, and on the right the day total (`3h 47m`, 20px Archivo `wght 600` tabular). The total counts up on change (Signature moment 2) and ticks every minute while running.
+**Today panel** (below; a glass panel, §2 LIGHT):
+- **Header row:** the gold eyebrow `TODAY`, the date `Wed, Oct 8` in secondary text, and on the right the day total (`3h 47m`, 20px Archivo `wght 600` tabular). The total counts up on change (Signature moment 2) and ticks every minute while running.
 - **Rows:** 40px each, newest `started_at` first, covering every session that overlaps today in the owner's time zone. Each row has:
   - A 3px left edge in the project colour.
   - The time range, tabular.
   - The task name (primary) and project name (muted).
-  - Tags (11px JetBrains Mono uppercase pill, `--color-surface-raised`, muted): `MANUAL`, `EDITED`, `FROM YESTERDAY` (started before today), and `RUNNING` with the cyan dot.
+  - Tags (11px JetBrains Mono uppercase pill, `--color-surface-raised`, muted): `MANUAL`, `EDITED`, `FROM YESTERDAY` (started before today), and `RUNNING` with the violet on-air dot.
   - The right-aligned duration. A row that started yesterday shows today's portion, with the tooltip "1h 20m in total — 25m of it today".
   - A ⋯ menu:
     - Closed sessions: **Edit…**, **Start this task again**, separator, **Delete…**.
@@ -744,7 +749,7 @@ Focus Log has seven screens. Two are for signed-out visitors (Sign in, Set passw
 - **Error:** an `CircleAlert` icon, "Couldn't load today's sessions." / "Check your connection, then try again." and the secondary button **Try again**.
 
 **Stage loading and error**
-- **Loading:** the task-line skeleton (240×20px), a clock skeleton (360px by the clock's line height, 8px radius) and two 44px button skeletons. It never shows `0:00:00` before the real state is known.
+- **Loading:** the task-line skeleton (240×20px), a clock skeleton (360px by the clock's line height, 16px radius) and two 44px button skeletons. It never shows `0:00:00` before the real state is known.
 - **Error:** "Couldn't reach your timer." / "Your time is safe on the server — this is just a connection problem." with the secondary button **Try again**. The controls are hidden until the timer view loads.
 
 **Timer dialogs**
@@ -778,7 +783,7 @@ Focus Log has seven screens. Two are for signed-out visitors (Sign in, Set passw
 - The ghost button **This week** / **This month**, disabled when already on the current period.
 - Changing any control updates the URL, so Back and Forward work.
 
-**Total card** (`--color-surface`, 8px radius, 32px padding):
+**Total card** (a gold-edged glass panel, §2 LIGHT, 32px padding):
 - **Eyebrow:** the range in `--color-accent-text` JetBrains Mono 12px uppercase, e.g. `OCT 6 – 12, 2026`.
 - **Number:** the display figure, e.g. `23h 15m`, 48px tabular, in the gold polished lettering (Archivo `wdth 125`, `wght 800`, `--gradient-gold` fill, §2).
 - **Left flank:** `WEEK OF` over `Mon, Oct 6`, or `MONTH OF` over `October 2026`.
@@ -790,8 +795,8 @@ Focus Log has seven screens. Two are for signed-out visitors (Sign in, Set passw
 - Each bar is stacked by project in the project colours, with "No project" in `--color-border-strong` and a 2px top radius.
 - **X axis:** `Mon 6` … `Sun 12` for a week, or day numbers for a month. Below 768px only every 5th month label is shown.
 - **Y axis:** whole-hour ticks (`0h`, `2h`, `4h`; the step is 1, 2 or 4 hours, chosen so there are at most 5 ticks), 12px muted tabular. Grid lines are `--color-border` horizontal only.
-- **Tooltip:** a token-styled card (overlay surface, 8px radius) showing `Wed, Oct 8`, the day total, and one row per project with its dot and duration.
-- **Animation:** bars grow from 0 over 400ms with `--ease-out` and a 20ms stagger, on the first render after page load only. Changing the period cross-fades the chart over 200ms, and reduced motion skips the grow.
+- **Tooltip:** a token-styled card (overlay surface, 16px radius) showing `Wed, Oct 8`, the day total, and one row per project with its dot and duration.
+- **Animation:** bars grow from 0 over 400ms with `--ease-out` and a 20ms stagger, on the first render after page load only. Changing the period cross-fades the chart over 200ms while its panels rise in (§2 MOTION), and reduced motion skips the grow.
 - **Accessibility:** the chart has `role="img"` with an `aria-label` summary ("Daily totals: Monday 3h 10m, Tuesday …"), and a visually hidden table carries the same data.
 
 **By project list:**
@@ -835,7 +840,7 @@ Focus Log has seven screens. Two are for signed-out visitors (Sign in, Set passw
   - **⋯ menu, closed session:** **Edit…**, **Start this task again**, separator, **Delete…**.
   - **⋯ menu, running session:** **Edit start time…** only. Delete is disabled, with the tooltip "Stop or discard the timer first".
 - **Paging:** 50 rows per page. The footer reads `Showing 50 of 312` with the secondary button **Show 50 more**, and new rows fade in over 200ms. When sorted by duration, the running session (if it matches the filters) is pinned at the top of the first page (§6).
-- **Mobile (<768px):** each row becomes a card (`--color-surface`, 8px radius, 12px padding). Line 1 is the task name and duration, line 2 is the project dot and name · range · date, and the ⋯ button sits top-right. Nothing scrolls horizontally.
+- **Mobile (<768px):** each row becomes a card (`--color-surface`, 16px radius, 12px padding). Line 1 is the task name and duration, line 2 is the project dot and name · range · date, and the ⋯ button sits top-right. Nothing scrolls horizontally.
 
 **States:**
 - **Loading:** sticky header plus 8 skeleton rows matching the column widths.
@@ -918,7 +923,7 @@ Focus Log has seven screens. Two are for signed-out visitors (Sign in, Set passw
 - **Error:** "Couldn't load your data." / "Check your connection, then try again." with **Try again**.
 
 ### Screen: Settings
-**Purpose:** time zone, reminders, the weekly email, the account, system status and the danger zone. Route `/settings`. Each section is a card (`--color-surface`, 8px radius, 24px padding) with an h2.
+**Purpose:** time zone, reminders, the weekly email, the account, system status and the danger zone. Route `/settings`. Each section is a glass panel (§2 LIGHT, 24px padding) with an h2 in the gold lettering.
 **Saving:** settings save on change. A small `Check` and "Saved" (13px muted) appear next to the control for 2 seconds, fading over 140ms. On a failed save the control reverts and an error toast reads "Couldn't save that change. Try again."
 **Sections:**
 1. **Time zone**
@@ -2091,13 +2096,13 @@ Each test maps to a specced behaviour. "Deploy-verified" means the behaviour is 
   - History and Your data tables become cards below 768px.
   - The sidebar becomes a rail at 768–1023px and a drawer below 768px.
 - **T-X8 Brief fidelity:**
-  - The stage renders gold-gradient digits, the light pool and the cyan on-air dot only while running.
-  - The flank labels and the gold hairline (40% width, 16px below) are present.
-  - The stage is framed by a 1px `--color-rim` border with an 8px radius. It is the only gold-edged surface: no other card, panel or dialog has a gold border.
-  - Gold gradient lettering appears on the wordmark, every h1 and the Reports display total, and nowhere else (not on h2, h3, body text, buttons or charts). It carries no `text-shadow`, glow or filter.
-  - The sign-in sparkle field is identical across reloads and avoids the card.
-  - The stage's 10-sparkle field is identical across reloads, avoids the clock box, task bar and controls row, is `aria-hidden`, never animates, and is hidden under `forced-colors`.
-  - The ribbon gradient appears only on the auth card edge, the 2px band at the top of every signed-in screen, and the email header band.
+  - The stage renders lavender-silver digits, the light pool and the violet on-air dot only while running.
+  - The flank labels and the 2px gold hairline (40% width, 16px below) are present.
+  - The stage is framed by a 1px `--gold-edge` border with a 16px radius. The gold-edged surfaces are exactly the stage, the Reports total card, the sign-in card and the welcome art.
+  - Gold gradient lettering appears on the wordmark, every h1, the Reports display total, the Settings card titles and the Reports "By day" title, and nowhere else (not on body text, buttons or charts).
+  - The sign-in sparkle field is identical across reloads and avoids the welcome art and the card.
+  - The stage's 10-sparkle field is identical across reloads, avoids the clock box, task bar and controls row, is `aria-hidden`, twinkles (still under reduced motion), and is hidden under `forced-colors`.
+  - The ribbon gradient appears only on the auth card edge and the 2px band at the top of every signed-in screen.
   - The app icons in `/icons/` are rendered from the §2 mark.
   - Gold never appears on a page background or a chart series.
   - Fonts load from self-hosted files only, with no requests to third-party font hosts.

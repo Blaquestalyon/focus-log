@@ -110,7 +110,7 @@ function ExampleCard() {
       ? null
       : `${kept.length > 1 ? `${kept.slice(0, -1).join(', ')} and ${kept[kept.length - 1]}` : kept[0]} ${kept.length === 1 ? 'has' : 'have'} your own time logged, so ${kept.length === 1 ? "it'll" : "they'll"} be kept.`;
   return (
-    <section aria-label="Example data" className="mb-6 flex flex-col gap-4 rounded-md border border-border bg-surface p-6 md:flex-row md:items-center">
+    <section aria-label="Example data" className="mb-6 flex flex-col gap-4 panel p-6 md:flex-row md:items-center">
       <div className="min-w-0 flex-1">
         <h2 className="card-heading text-text-primary">Example data is loaded.</h2>
         <p className="mt-1 text-sm text-text-secondary">
@@ -129,7 +129,7 @@ function ExampleCard() {
 
 function TableSkeleton() {
   return (
-    <div aria-busy className="rounded-md border border-border bg-surface">
+    <div aria-busy className="panel">
       {Array.from({ length: 6 }, (_, i) => (
         <div key={i} className="flex h-10 items-center gap-3 border-b border-border px-4 last:border-b-0">
           <Skeleton className="h-3 flex-1" />
@@ -144,7 +144,7 @@ function TableSkeleton() {
 
 function LoadError({ onRetry }: { onRetry: () => void }) {
   return (
-    <div className="rounded-md border border-border bg-surface">
+    <div className="panel">
       <ErrorState title="Couldn't load your data." onRetry={onRetry} />
     </div>
   );
@@ -210,7 +210,7 @@ function ProjectsTab() {
       ) : !data || (loading && !data.length) ? (
         <TableSkeleton />
       ) : rows.length === 0 ? (
-        <div className="rounded-md border border-border bg-surface">
+        <div className="panel">
           <EmptyState
             title="No projects yet."
             body="Projects and clients keep your hours sorted. Add your first one."
@@ -222,7 +222,7 @@ function ProjectsTab() {
           />
         </div>
       ) : (
-        <div role="table" aria-label="Projects" className="rounded-md border border-border bg-surface">
+        <div role="table" aria-label="Projects" className="panel">
           <div role="row" className="sticky top-[var(--size-ribbon)] z-[var(--z-sticky)] hidden h-10 items-center gap-3 rounded-t-md border-b border-border bg-bg-1 px-4 md:flex">
             <HeaderCell className="min-w-0 flex-1" sort={sort.key === 'name' ? sort.dir : 'none'} onSort={() => toggleSort('name')}>Project</HeaderCell>
             <HeaderCell className="w-16 justify-end text-right">Tasks</HeaderCell>
@@ -372,7 +372,7 @@ function TasksTab() {
       ) : !data ? (
         <TableSkeleton />
       ) : rows.length === 0 ? (
-        <div className="rounded-md border border-border bg-surface">
+        <div className="panel">
           {filtered ? (
             <EmptyState title="No tasks match." body="Try a different word or project." />
           ) : (
@@ -388,7 +388,7 @@ function TasksTab() {
           )}
         </div>
       ) : (
-        <div role="table" aria-label="Tasks" className={cn('rounded-md border border-border bg-surface', loading && 'opacity-70')}>
+        <div role="table" aria-label="Tasks" className={cn('panel', loading && 'opacity-70')}>
           <div role="row" className="sticky top-[var(--size-ribbon)] z-[var(--z-sticky)] hidden h-10 items-center gap-3 rounded-t-md border-b border-border bg-bg-1 px-4 md:flex">
             <HeaderCell className="min-w-0 flex-1">Task</HeaderCell>
             <HeaderCell className="w-44">Project</HeaderCell>
@@ -535,7 +535,7 @@ function EmailsTab() {
   if (!rows) return <TableSkeleton />;
   if (!rows.length) {
     return (
-      <div className="rounded-md border border-border bg-surface">
+      <div className="panel">
         <EmptyState
           icon={<Mail className="size-10" strokeWidth={1.5} aria-hidden />}
           title="No emails yet."
@@ -558,7 +558,7 @@ function EmailsTab() {
     );
   }
   return (
-    <div role="table" aria-label="Sent emails" className="rounded-md border border-border bg-surface">
+    <div role="table" aria-label="Sent emails" className="panel">
       <div role="row" className="sticky top-[var(--size-ribbon)] z-[var(--z-sticky)] hidden h-10 items-center gap-3 rounded-t-md border-b border-border bg-bg-1 px-4 md:flex">
         <HeaderCell className="w-44">Date</HeaderCell>
         <HeaderCell className="w-32">Type</HeaderCell>

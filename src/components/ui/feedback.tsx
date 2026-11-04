@@ -82,7 +82,7 @@ export function Notice({
     <div
       role={role}
       className={cn(
-        'relative flex items-start gap-3 overflow-hidden rounded-md border border-border bg-surface p-4',
+        'relative flex items-start gap-3 overflow-hidden panel p-4',
         className,
       )}
     >

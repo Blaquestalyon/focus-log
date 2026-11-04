@@ -66,7 +66,7 @@ export function SignInForm() {
     }
   };
 
-  const title = <span className="lettering text-gold block text-h1">Focus Log</span>;
+  const title = <span className="lettering text-gold block text-h1">Welcome back</span>;
 
   if (mode === 'sent') {
     return (
@@ -126,7 +126,7 @@ export function SignInForm() {
   }
 
   return (
-    <AuthCard title={title} subtitle="Sign in to your timer.">
+    <AuthCard title={title} subtitle="Sign in to your personal workspace.">
       <form
         key="signin"
         noValidate

@@ -8,7 +8,7 @@ export type Variant = 'primary' | 'secondary' | 'ghost' | 'danger';
 export type Size = 'md' | 'lg' | 'sm';
 
 const VARIANT: Record<Variant, { base: string; live: string }> = {
-  primary: { base: 'bg-accent text-on-accent', live: 'hover:bg-accent-hover active:bg-accent-pressed' },
+  primary: { base: 'btn-glow bg-accent text-on-accent', live: 'hover:bg-accent-hover active:bg-accent-pressed' },
   secondary: {
     base: 'bg-surface-raised text-text-primary border border-border-strong',
     live: 'hover:bg-surface-overlay active:bg-surface',

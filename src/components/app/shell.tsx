@@ -76,7 +76,7 @@ function MiniTimer({ variant }: { variant: 'full' | 'rail' | 'pill' }) {
     );
   }
   return (
-    <Link href="/" aria-label={label} className="mx-3 flex min-h-10 items-center gap-3 rounded-md border border-border bg-surface px-3 py-2 transition-fast hover:bg-surface-raised max-md:min-h-11">
+    <Link href="/" aria-label={label} className="mx-3 flex min-h-10 items-center gap-3 panel px-3 py-2 transition-fast hover:bg-surface-raised max-md:min-h-11">
       <OnAirDot paused={paused} />
       <Tip label={view.task.name}>
         <span className="min-w-0 flex-1 truncate text-sm text-text-primary">{view.task.name}</span>
@@ -238,18 +238,18 @@ export function AppShell({ email, children }: { email: string; children: ReactNo
       <div className="flex min-h-dvh pt-[var(--size-ribbon)]">
         <aside
           aria-label="Sidebar"
-          className="sticky top-[var(--size-ribbon)] hidden h-[calc(100dvh-var(--size-ribbon))] w-[var(--size-sidebar)] shrink-0 border-r border-border bg-bg-0 lg:block"
+          className="sticky top-[var(--size-ribbon)] hidden h-[calc(100dvh-var(--size-ribbon))] w-[var(--size-sidebar)] shrink-0 border-r border-border glass-sidebar lg:block"
         >
           <SidebarBody email={email} />
         </aside>
         <aside
           aria-label="Sidebar"
-          className="sticky top-[var(--size-ribbon)] hidden h-[calc(100dvh-var(--size-ribbon))] w-[var(--size-rail)] shrink-0 border-r border-border bg-bg-0 md:block lg:hidden"
+          className="sticky top-[var(--size-ribbon)] hidden h-[calc(100dvh-var(--size-ribbon))] w-[var(--size-rail)] shrink-0 border-r border-border glass-sidebar md:block lg:hidden"
         >
           <Rail email={email} />
         </aside>
-        <div className="flex min-w-0 flex-1 flex-col bg-bg-1">
-          <header className="sticky top-[var(--size-ribbon)] z-[var(--z-sticky)] flex h-[var(--size-topbar)] items-center gap-2 border-b border-border bg-bg-0 px-2 md:hidden">
+        <div className="flex min-w-0 flex-1 flex-col">
+          <header className="sticky top-[var(--size-ribbon)] z-[var(--z-sticky)] flex h-[var(--size-topbar)] items-center gap-2 border-b border-border glass-sidebar px-2 md:hidden">
             <Link href="/" aria-label="Focus Log — Timer" className="flex h-10 items-center gap-2 rounded-sm px-2">
               <Mark />
               <Wordmark />

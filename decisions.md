@@ -145,3 +145,12 @@ Same behavior, same look, same checks. Dependencies unchanged (installed from th
   - `npm run typecheck`, and `npm test` (39 tests, as before);
   - `npm run build`, with the compiled CSS byte-identical to `main`;
   - `npm run lint` reports the same three raw pixel values at `src/components/ui/form.tsx:93` as on `main`.
+
+## 2026-11-04 — The violet-and-gold restyle and the welcome screen
+
+- **The look moves from "broadcast booth after hours" to the owner's Focus Log feature image** (owner's direction: *"i need the style and aesthetic to be more like this feature image … dull and boring is out. let's make this more lively and dynamic."*).
+  - *What changed:* indigo-violet neutrals; every card is a frosted glass panel with a violet under-glow; the Timer stage, Reports total card, sign-in card and welcome art carry a gold edge and halo; primary buttons glow gold; the running clock is moonlit lavender-silver over a violet-and-gold pool; the on-air dot and info icon move from cyan to violet; radii go 4/8px → 8/16px; the screen sits in a lit, slowly drifting room; panels rise in, sparkles twinkle. Settings card titles and the Reports "By day" title take the gold lettering, and "Today" becomes a gold eyebrow. §2 and §4 rewritten to match; every new colour a component uses is a token in `src/styles/tokens.css` (the room, sweep and light-pool gradients sit inline in `src/styles/globals.css`).
+  - *Why the old NEVER list changed:* it banned purple gradients, frosted glass, radii above 8px and glow — exactly what the owner asked for.
+- **Sign-in becomes a welcome screen:** the owner's feature image (`public/brand/welcome.webp`) sits beside the sign-in card from 1024px and above it on smaller screens. The card's heading is now "Welcome back" / "Sign in to your personal workspace." (was "Focus Log" / "Sign in to your timer."), because the art already carries the name. `/brand/` is added to the public paths so the image loads before sign-in.
+- **Not changed:** the two emails keep their navy-to-blue header band; no screen layout, label (other than the sign-in heading), behaviour or data changed.
+- *Checked:* the token lint adds no raw values (it still reports only the existing `form.tsx:93`), `tsc` and `npm test` (39) pass, `npm run build` passes; contrast re-measured for every text colour on every surface (all AA); the welcome screen at 375, 800 and 1440px; Timer, Reports, History and Settings at 1440px and Timer at 375px, on local sample data.

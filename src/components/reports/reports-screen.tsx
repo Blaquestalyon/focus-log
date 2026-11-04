@@ -179,13 +179,13 @@ export function ReportsScreen() {
       </div>
 
       {error && !data ? (
-        <div className="rounded-md border border-border bg-surface">
+        <div className="panel">
           <ErrorState title="Couldn't load this report." onRetry={() => void reload()} />
         </div>
       ) : !data || (loading && data.range.start !== start) ? (
         <ReportSkeleton />
       ) : data.total_seconds === 0 ? (
-        <div className="rounded-md border border-border bg-surface">
+        <div className="panel">
           <EmptyState
             title={`No time logged this ${unit}.`}
             body="Start a timer and it'll show up here, or add time you forgot to track."
@@ -207,7 +207,7 @@ export function ReportsScreen() {
       ) : (
         <div key={`${period}-${start}`} className="anim-crossfade flex flex-col gap-6">
           {/* Total card */}
-          <section aria-label="Total" className="rounded-md border border-border bg-surface p-8">
+          <section aria-label="Total" className="panel panel-gold p-8">
             <div className="eyebrow">{period === 'week' ? data.range.label.toUpperCase() : formatMonth(data.range.start).toUpperCase()}</div>
             <div className="mt-4 flex flex-col gap-4 md:flex-row md:items-end md:gap-8">
               <div className="order-2 flex flex-col gap-1 md:order-1 md:w-40">
@@ -232,8 +232,8 @@ export function ReportsScreen() {
           </section>
 
           {/* Daily chart */}
-          <section aria-label="Daily totals" className="rounded-md border border-border bg-surface p-4 md:p-6">
-            <h2 className="card-heading mb-4 text-text-primary">By day</h2>
+          <section aria-label="Daily totals" className="panel p-4 md:p-6">
+            <h2 className="card-heading text-gold mb-4">By day</h2>
             <div role="img" aria-label={summaryLabel} className="h-[var(--size-chart)] w-full">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={chartData} margin={{ top: 4, right: 4, bottom: 0, left: -12 }}>
@@ -317,7 +317,7 @@ export function ReportsScreen() {
           </section>
 
           {/* By project */}
-          <section aria-label="By project" className="rounded-md border border-border bg-surface">
+          <section aria-label="By project" className="panel">
             <div className="flex h-10 items-center border-b border-border px-4">
               <span className="micro-label flex-1">Project</span>
               <span className="micro-label w-20 text-right">Time</span>
@@ -383,16 +383,16 @@ function ReportSkeleton() {
   const heights = [40, 70, 55, 85, 30, 60, 45];
   return (
     <div aria-busy className="flex flex-col gap-6">
-      <div className="rounded-md border border-border bg-surface p-8">
+      <div className="panel p-8">
         <Skeleton className="h-3 w-40" />
         <Skeleton className="mt-4 h-12 w-56" />
       </div>
-      <div className="flex h-[var(--size-chart)] items-end gap-3 rounded-md border border-border bg-surface p-6">
+      <div className="flex h-[var(--size-chart)] items-end gap-3 panel p-6">
         {heights.map((h, i) => (
           <Skeleton key={i} className="flex-1" style={{ height: `${h}%` }} />
         ))}
       </div>
-      <div className="rounded-md border border-border bg-surface">
+      <div className="panel">
         {[0, 1, 2, 3].map((i) => (
           <div key={i} className="flex h-11 items-center gap-3 border-b border-border px-4 last:border-b-0">
             <Skeleton className="h-3 flex-1" />
