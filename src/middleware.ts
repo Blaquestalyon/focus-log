@@ -4,7 +4,7 @@ import { createServerClient } from '@supabase/ssr';
 /**
  * Session refresh + access rules (§1 Roles, §7 Auth).
  * Public: /sign-in, /set-password, /api/auth/*, /api/health, /health and the static files a browser
- * needs before signing in (/sw.js, /manifest.webmanifest, /icons/*). Every other page
+ * needs before signing in (/sw.js, /manifest.webmanifest, /icons/*, /brand/*). Every other page
  * redirects to /sign-in?next=…, every other API route answers 401.
  */
 const PUBLIC_PAGES = ['/sign-in', '/set-password'];
@@ -59,5 +59,5 @@ export async function middleware(req: NextRequest) {
 
 export const config = {
   runtime: 'nodejs',
-  matcher: ['/((?!_next/static|_next/image|favicon.ico|sw.js|manifest.webmanifest|icons/).*)'],
+  matcher: ['/((?!_next/static|_next/image|favicon.ico|sw.js|manifest.webmanifest|icons/|brand/).*)'],
 };

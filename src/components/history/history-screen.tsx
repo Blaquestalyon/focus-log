@@ -268,13 +268,13 @@ export function HistoryScreen() {
 
       <div className="mt-4">
         {error && !meta ? (
-          <div className="rounded-md border border-border bg-surface">
+          <div className="panel">
             <ErrorState title="Couldn't load your history." onRetry={() => void load()} />
           </div>
         ) : loading && !meta ? (
           <TableSkeleton />
         ) : rows.length === 0 ? (
-          <div className="rounded-md border border-border bg-surface">
+          <div className="panel">
             {everEmpty ? (
               <EmptyState
                 title="Your history starts with your first timer."
@@ -305,7 +305,7 @@ export function HistoryScreen() {
             )}
           </div>
         ) : (
-          <div className={cn('rounded-md border border-border bg-surface', loading && 'opacity-70 transition-base')}>
+          <div className={cn('panel', loading && 'opacity-70 transition-base')}>
             <div role="table" aria-label="Sessions" aria-rowcount={meta?.total_count}>
               <div role="rowgroup" className="sticky top-[calc(var(--size-ribbon)+var(--size-topbar))] z-[var(--z-sticky)] hidden rounded-t-md border-b border-border bg-bg-1 md:top-[var(--size-ribbon)] md:block">
                 <div role="row" className="flex h-10 items-center gap-3 pl-4 pr-1">
@@ -551,7 +551,7 @@ function ProjectFilter({
 
 function TableSkeleton() {
   return (
-    <div aria-busy className="rounded-md border border-border bg-surface">
+    <div aria-busy className="panel">
       <div className="hidden h-10 items-center gap-3 border-b border-border bg-bg-1 px-4 md:flex">
         <Skeleton className="h-3 w-16" />
         <Skeleton className="h-3 w-16" />

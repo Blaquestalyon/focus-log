@@ -4,7 +4,8 @@
 /* ------------------------------------------------------------------ base */
 @layer base {
   html {
-    background: var(--color-bg-0);
+    background: var(--ambient), var(--color-bg-0);
+    background-attachment: fixed;
     color: var(--color-text-primary);
     font-family: var(--font-sans);
     font-size: 16px;
@@ -16,6 +17,13 @@
   body {
     min-height: 100dvh;
     font-variation-settings: "wdth" 100;
+  }
+  /* A second, slowly drifting layer of the room's light: the app never sits perfectly still. */
+  body::before {
+    content: ""; position: fixed; inset: -20%; z-index: -1; pointer-events: none;
+    background: radial-gradient(30% 30% at 70% 40%, rgba(139, 92, 246, 0.10) 0%, rgba(139, 92, 246, 0) 70%),
+      radial-gradient(25% 25% at 20% 70%, rgba(226, 188, 92, 0.06) 0%, rgba(226, 188, 92, 0) 70%);
+    animation: fl-drift var(--dur-drift) ease-in-out infinite alternate;
   }
   ::selection {
     background: var(--color-accent-subtle-border);
@@ -148,6 +156,43 @@
     height: var(--size-ribbon); background: var(--gradient-ribbon);
   }
 
+  /* Glass panel: every card in the app (the welcome art's frosted, violet-lit cards). */
+  .panel {
+    border-radius: var(--radius-md);
+    border: var(--size-hairline) solid var(--panel-edge);
+    background: var(--panel-fill);
+    -webkit-backdrop-filter: blur(var(--blur-glass));
+    backdrop-filter: blur(var(--blur-glass));
+    box-shadow: var(--panel-glow);
+    animation: fl-rise var(--dur-rise) var(--ease-out) backwards;
+    transition: box-shadow var(--dur-fast) var(--ease-out), border-color var(--dur-fast) var(--ease-out);
+  }
+  .panel:hover { box-shadow: var(--panel-glow-hover); }
+  .panel-gold, .panel-gold:hover { border-color: var(--gold-edge); box-shadow: var(--gold-glow); }
+  .glass-sidebar {
+    background: var(--sidebar-fill);
+    -webkit-backdrop-filter: blur(var(--blur-glass));
+    backdrop-filter: blur(var(--blur-glass));
+  }
+  .btn-glow { box-shadow: var(--button-glow); }
+  .btn-glow:hover:not([aria-disabled]) { box-shadow: var(--button-glow-hover); }
+
+  /* The welcome art on sign-in: framed in gold, floats gently, a slow light sweeps across it. */
+  .welcome-art {
+    position: relative; overflow: hidden; margin: 0;
+    border-radius: var(--radius-art);
+    border: var(--size-hairline) solid var(--gold-edge);
+    box-shadow: var(--gold-glow);
+    animation: fl-art-in var(--dur-rise) var(--ease-out) both, fl-float var(--dur-float) ease-in-out var(--dur-rise) infinite alternate;
+  }
+  .welcome-art::after {
+    content: ""; position: absolute; inset: 0; pointer-events: none;
+    background: linear-gradient(110deg, rgba(255, 255, 255, 0) 40%, rgba(255, 240, 200, 0.10) 50%, rgba(255, 255, 255, 0) 60%);
+    transform: translateX(-100%);
+    animation: fl-sweep var(--dur-sweep) ease-in-out 1s infinite;
+  }
+  .welcome-card { animation-delay: 120ms; }
+
   /* Skeleton pulse (static under reduced motion). */
   .skeleton {
     background: var(--color-surface-raised);
@@ -159,8 +204,13 @@
   .stage {
     position: relative;
     isolation: isolate;
-    background: var(--color-bg-1);
-    border: var(--size-hairline) solid var(--color-rim);
+    background: var(--panel-fill);
+    -webkit-backdrop-filter: blur(var(--blur-glass));
+    backdrop-filter: blur(var(--blur-glass));
+    box-shadow: var(--gold-glow);
+    z-index: 1;
+    animation: fl-rise var(--dur-rise) var(--ease-out) backwards;
+    border: var(--size-hairline) solid var(--gold-edge);
     border-radius: var(--radius-md);
     min-height: var(--size-stage-min);
     padding: var(--space-4);
@@ -171,13 +221,18 @@
     position: absolute; inset: 0; z-index: 0;
     pointer-events: none; overflow: hidden; border-radius: inherit;
   }
-  .starfield svg { position: absolute; display: block; fill: var(--color-white); }
+  .starfield svg {
+    position: absolute; display: block; fill: var(--color-white);
+    animation: fl-twinkle var(--dur-twinkle) ease-in-out infinite;
+  }
+  .starfield svg:nth-child(3n) { fill: var(--gold-1); animation-delay: -1.6s; animation-duration: 6.2s; }
+  .starfield svg:nth-child(3n + 1) { animation-delay: -3.1s; }
   .stage-layer { position: relative; z-index: 2; container-type: inline-size; }
   .light-pool {
     position: absolute; z-index: 1; pointer-events: none;
     width: 70%; height: 45%;
     left: 15%;
-    background: radial-gradient(closest-side, rgba(212, 167, 69, 0.07), rgba(212, 167, 69, 0));
+    background: radial-gradient(closest-side, rgba(167, 139, 250, 0.16), rgba(226, 188, 92, 0.04) 60%, rgba(167, 139, 250, 0));
     opacity: 0;
     transition: opacity var(--dur-stage) var(--ease-out);
   }
@@ -206,6 +261,8 @@
   /* A little end padding so the last digit's ink stays inside the gold fill's box. */
   .clock-layer { padding-inline-end: 0.05em; transition: opacity var(--dur-stage) var(--ease-out); }
   .clock-flat { position: absolute; inset: 0; color: var(--color-text-secondary); }
+  /* The running clock is moonlit lavender-silver (the welcome art), with a soft violet glow. */
+  .clock-gold { background-image: var(--gradient-moon); filter: var(--clock-glow); }
   .clock[data-state="running"] .clock-flat { opacity: 0; }
   .clock[data-state="running"] .clock-gold { opacity: 1; }
   .clock[data-state="paused"] .clock-flat { opacity: 1; }
@@ -217,9 +274,11 @@
     animation: fl-digit-in var(--dur-digit) var(--ease-out) both;
   }
   .hairline-gold {
-    height: var(--size-hairline);
+    height: var(--size-focus);
     width: 40%;
-    background: var(--color-accent);
+    border-radius: var(--radius-pill);
+    background: var(--gradient-gold);
+    box-shadow: var(--button-glow);
     margin-top: var(--space-4);
   }
 
@@ -285,6 +344,12 @@
 
 /* ------------------------------------------------------------ keyframes */
 @keyframes fl-pulse { from { opacity: 0.5; } to { opacity: 0.8; } }
+@keyframes fl-rise { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes fl-twinkle { 0%, 100% { transform: scale(1); filter: brightness(1); } 50% { transform: scale(0.6) rotate(20deg); filter: brightness(1.8); } }
+@keyframes fl-art-in { from { opacity: 0; transform: scale(0.97); } to { opacity: 1; transform: scale(1); } }
+@keyframes fl-float { from { transform: translateY(0); } to { transform: translateY(-6px); } }
+@keyframes fl-sweep { 0% { transform: translateX(-100%); } 45%, 100% { transform: translateX(100%); } }
+@keyframes fl-drift { from { transform: translate3d(-4%, -3%, 0); } to { transform: translate3d(4%, 3%, 0); } }
 @keyframes fl-breathe {
   0%, 100% { box-shadow: var(--halo-signal); }
   50% { box-shadow: var(--halo-signal-dim); }
@@ -308,6 +373,9 @@
 /* ------------------------------------------------------- reduced motion */
 @media (prefers-reduced-motion: reduce) {
   .skeleton { animation: none; opacity: 0.65; }
+  body::before, .starfield svg, .welcome-art::after { animation: none; }
+  .welcome-art { animation: fl-fade-in var(--dur-reduced) linear both; }
+  .panel, .stage { animation: fl-fade-in var(--dur-reduced) linear backwards; }
   .onair { animation: none; }
   .clock[data-entering="true"] .clock-digit { animation: none; }
   .logged-sparkle { display: none; }
@@ -326,6 +394,7 @@
 @media (forced-colors: active) {
   .text-gold { background: none; color: CanvasText; -webkit-text-fill-color: CanvasText; }
   .starfield { display: none; }
+  .clock-gold { filter: none; }
   .light-pool { display: none; }
 }
 

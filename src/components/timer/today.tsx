@@ -125,7 +125,7 @@ export function TodayPanel() {
 
   if (!data && error) {
     return (
-      <section aria-label="Today" className="rounded-md border border-border bg-surface">
+      <section aria-label="Today" className="panel">
         <ErrorState title="Couldn't load today's sessions." onRetry={() => void load()} />
       </section>
     );
@@ -133,7 +133,7 @@ export function TodayPanel() {
 
   if (!data) {
     return (
-      <section aria-label="Today" aria-busy className="rounded-md border border-border bg-surface">
+      <section aria-label="Today" aria-busy className="panel">
         <div className="flex h-12 items-center justify-between border-b border-border px-4">
           <Skeleton className="h-3 w-28" />
           <Skeleton className="h-5 w-16" />
@@ -157,9 +157,9 @@ export function TodayPanel() {
   }, 0);
 
   return (
-    <section aria-label="Today" className="rounded-md border border-border bg-surface">
+    <section aria-label="Today" className="panel">
       <div className="flex h-12 items-center gap-3 border-b border-border px-4">
-        <h2 className="micro-label">Today</h2>
+        <h2 className="eyebrow">Today</h2>
         <span className="text-meta text-text-secondary">{formatDateStr(data.date, data.time_zone)}</span>
         <CountUp seconds={total} className="tnum ml-auto text-h2 font-semibold text-text-primary" />
       </div>

@@ -29,9 +29,9 @@ function Card({ title, id, children, danger }: { title: string; id?: string; chi
     <section
       id={id}
       aria-labelledby={`${id ?? title}-h`}
-      className={cn('scroll-mt-8 rounded-md border bg-surface p-6', danger ? 'border-danger/40' : 'border-border')}
+      className={cn('panel scroll-mt-8 p-6', danger && 'border-danger/40')}
     >
-      <h2 id={`${id ?? title}-h`} className="section-heading mb-4 text-text-primary">
+      <h2 id={`${id ?? title}-h`} className="section-heading text-gold mb-4">
         {title}
       </h2>
       {children}
@@ -81,7 +81,7 @@ export function SettingsScreen() {
     return (
       <>
         <PageHeader title="Settings" />
-        <div className="rounded-md border border-border bg-surface">
+        <div className="panel">
           <ErrorState title="Couldn't load your settings." onRetry={() => void reload()} />
         </div>
       </>
@@ -93,7 +93,7 @@ export function SettingsScreen() {
         <PageHeader title="Settings" />
         <div aria-busy className="flex flex-col gap-6">
           {Array.from({ length: 6 }, (_, i) => (
-            <div key={i} className="rounded-md border border-border bg-surface p-6">
+            <div key={i} className="panel p-6">
               <Skeleton className="h-5 w-40" />
               <Skeleton className="mt-4 h-10 w-full max-w-md" />
               <Skeleton className="mt-3 h-3 w-64" />

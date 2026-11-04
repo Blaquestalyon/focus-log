@@ -90,8 +90,8 @@ function mulberry32(seed: number) {
 interface Star { x: number; y: number; size: number; opacity: number }
 
 /**
- * A fixed field of white sparkles. Candidate positions come from a fixed seed (identical on
- * every visit); stars whose box would touch any `avoid` element are skipped. Never animates.
+ * A fixed field of white and pale-gold sparkles. Candidate positions come from a fixed seed (identical on
+ * every visit); stars whose box would touch any `avoid` element are skipped. Each star twinkles in CSS.
  */
 export function Starfield({
   count,
